@@ -23,7 +23,7 @@
 			<div class="nav">
 				<ul class="menu">
 					<li><a href="index.html">Home</a></li>
-					<li class="current-menu-item"><a href="map.html">Map</a></li>
+					<li class="current-menu-item"><a href="map.php">Map</a></li>
 					<li><a id="charts_link" href="javascript:void(0);">Charts</a></li>
 				</ul>
 			</div>
@@ -145,8 +145,8 @@
 		<script src="map.js"></script> -->
 		
 		<!-- Openlayers -->
-		<!--<script type="text/javascript" src="http://openlayers.org/dev/OpenLayers.js"></script>-->
-		<script type="text/javascript" src="http://localhost:8080/geoserver/openlayers/OpenLayers.js"></script>
+		<!--<script type="text/javascript" src="http://localhost:8080/geoserver/openlayers/OpenLayers.js"></script>-->
+		<script type="text/javascript" src="http://openlayers.org/dev/OpenLayers.js"></script>
 		<script src="js/base.js"></script>
 		<script src="js/layer.js"></script>
 

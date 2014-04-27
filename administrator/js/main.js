@@ -31,7 +31,7 @@ jQuery(document).ready(function($) {
 		$('#notification').find('span.info').css('display', 'block');
 		$('#notification').find('p').css('color', 'green').html('Creating...');
 		$.ajax({
-			url: 'http://localhost/dadangsinhhoc/administrator/functions.php',
+			url: 'functions.php',
 			type: 'POST',
 			data: request
 		})
@@ -98,7 +98,7 @@ jQuery(document).ready(function($) {
 		console.log(request);
 
 		$.ajax({
-			url: 'http://localhost/dadangsinhhoc/administrator/functions.php',
+			url: 'functions.php',
 			type: 'POST',
 			data: request
 		})
