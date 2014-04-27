@@ -77,7 +77,7 @@ function closeDB($link) {
 
 // Tables
 function createTable() {
-
+	
 }
 
 function updateTable() {
@@ -149,8 +149,8 @@ function viewTable($namedb, $nametb, $selects = array('*'), $wheres = array()) {
 		$i++;
 		$cm = '=';
 		if($val === true)
-			$cm = 'IS'
-		else ($val === false) 
+			$cm = 'IS';
+		else
 			$cm = 'IS NOT';	
 		$whe .= "$key $cm '$val'";
 	}
