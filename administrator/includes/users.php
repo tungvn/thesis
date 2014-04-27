@@ -55,7 +55,7 @@ function login($username, $password, $redirect_to) {
 			$_SESSION['is_admin'] = false;
 
 		// current user
-		$_SESSION["username"] = $user;
+		$_SESSION["user_id"] = 'user-' . $row['id'];
 
 		// reload the page
 		header('Location: ' . $redirect);
@@ -101,7 +101,9 @@ function register($username, $password, $email) {
 }
 
 /* Current user */
-function currentUser() {
-	
+function currentUserID() {
+	@session_start();
+	$current_user_id = substr($_SESSION['user_id'], strpos($_SESSION['user_id'], '-')+1);
+	return $current_user_id;
 }
 ?>
