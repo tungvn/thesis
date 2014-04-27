@@ -18,7 +18,7 @@ function createDB($name) {
 
 	closeDB($link);
 
-	if(!$result) return true;
+	if($result) return true;
 	return false;
 }
 
@@ -31,7 +31,7 @@ function renameDB($old_name, $new_name) {
 
 	closeDB($link);
 
-	if(!$result) return true;
+	if($result) return true;
 	return false;
 }
 
@@ -44,7 +44,7 @@ function dropDB($name) {
 
 	closeDB($link);
 
-	if(!$result) return true;
+	if($result) return true;
 	return false;
 }
 
@@ -57,7 +57,7 @@ function commentDB($name, $desc) {
 
 	closeDB($link);
 
-	if(!$result) return true;
+	if($result) return true;
 	return false;
 }
 
@@ -77,7 +77,7 @@ function closeDB($link) {
 
 // Tables
 function createTable() {
-	
+
 }
 
 function updateTable() {
@@ -93,7 +93,7 @@ function dropTable($namedb, $nametb) {
 
 	closeDB($link);
 
-	if(!$result) return true;
+	if($result) return true;
 	return false;
 }
 
@@ -111,18 +111,18 @@ function insertTable($namedb, $nametb, $args = array()) {
 			$vals .= ', ';
 		}
 		$i++;
-		$cols .= "'$col'";
+		$cols .= $col;
 		$vals .= "'$val'";
 	}
 	$cols .= ')';
 	$vals .= ')';
 
-	$query = "INSERT INTO '$nametb' $cols VALUES $vals";
+	$query = "INSERT INTO $nametb $cols VALUES $vals";
 	$result = pg_query($link, $query);
 
 	closeDB($link);
 
-	if(!$result) return true;
+	if($result) return true;
 	return false;
 }
 
@@ -150,16 +150,47 @@ function viewTable($namedb, $nametb, $selects = array('*'), $wheres = array()) {
 		$cm = '=';
 		if($val === true)
 			$cm = 'IS';
-		else
+		elseif ($val === false)
 			$cm = 'IS NOT';	
 		$whe .= "$key $cm '$val'";
 	}
-	$query = "SELECT $sel FROM $nametb WHERE $whe";
+
+	$query = "SELECT $sel FROM $nametb";
+	if(sizeof($wheres) > 0) 
+		$query .= " WHERE $whe";
 	$result = pg_query($link, $query);
 
 	closeDB($link);
 
-	if(!$result) return true;
+	if($result) return $result;
+	return false;
+}
+
+function dropRecords($namedb, $nametb, $wheres) {
+	$link = connectDB('localhost', $namedb, 'postgres', '123456');
+	if(!$link) return false;
+
+	$whe = '';
+	$i = 0;
+	foreach ($wheres as $key => $val) {
+		if($i != 0) {
+			$whe .= ' AND ';
+		}
+		$i++;
+		$cm = '=';
+		if($val === true)
+			$cm = 'IS';
+		elseif ($val === false)
+			$cm = 'IS NOT';	
+		$whe .= "$key $cm '$val'";
+	}
+
+	$query = "DELETE FROM $nametb WHERE $whe";
+	$result = pg_query($link, $query);
+
+	closeDB($link);
+
+	if($result) return true;
 	return false;
 }
 ?>

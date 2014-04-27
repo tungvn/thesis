@@ -28,16 +28,29 @@ jQuery(document).ready(function($) {
 			data: data,
 			action: 'submit_add_new_object'
 		}
+
+		$('#notification').find('span').each(function() { $(this).css('display', 'none'); });
 		$('#notification').find('span.info').css('display', 'block');
 		$('#notification').find('p').css('color', 'green').html('Creating...');
+
 		$.ajax({
 			url: 'functions.php',
 			type: 'POST',
 			data: request
 		})
 		.done(function(response) {
+			$('#notification').find('span').each(function() { $(this).css('display', 'none'); });
+			$('#notification').find('p').css('color', 'green').html('');
+			if(response == 'success') {
+				$('#notification').find('span.info').css('display', 'block');
+				$('#notification').find('p').css('color', 'green').html('Create successfully');
+			}
+			else {
+				$('#notification').find('span.error').css('display', 'block');
+				$('#notification').find('p').css('color', 'red').html('Cannot create new object!');
+			}
 			console.log(response);
-			location.reload();
+			setTimeout(location.reload(), 1500);
 		})
 		.fail(function() {
 			console.log("error");
@@ -82,20 +95,20 @@ jQuery(document).ready(function($) {
 		console.log(data.length);
 		var request = {};
 		if(data[0].name == 'action' && data[0].value != '') {
-			$('#notification').find('span.error').css('display', 'none');
-			$('#notification').find('p').css('color', 'red').html('');
+			$('#notification').find('span').each(function() { $(this).css('display', 'none'); });
+			$('#notification').find('p').html('');
 			
-			request = {
-				data: data,
-				action: 'submit_' + data[0].value +'_object'
-			}
+			if(data[1].name == 'select-all' || data[1].name != '')
+				request = {
+					data: data,
+					action: 'submit_' + data[0].value +'_object'
+				}
 		}
 		else {
 			$('#notification').find('span.error').css('display', 'block');
 			$('#notification').find('p').css('color', 'red').html('You must select actions!');
 			return false;
 		}
-		console.log(request);
 
 		$.ajax({
 			url: 'functions.php',
@@ -104,7 +117,17 @@ jQuery(document).ready(function($) {
 		})
 		.done(function(response) {
 			console.log(response);
-			//location.reload();
+			$('#notification').find('span').each(function() { $(this).css('display', 'none'); });
+			$('#notification').find('p').css('color', 'green').html('');
+			if(response == 'success') {
+				$('#notification').find('span.info').css('display', 'block');
+				$('#notification').find('p').css('color', 'green').html('Delete successfully');
+			}
+			else {
+				$('#notification').find('span.error').css('display', 'block');
+				$('#notification').find('p').css('color', 'red').html('Cannot delete objects!');
+			}
+			setTimeout(location.reload(), 1500);
 		})
 		.fail(function() {
 			console.log("error");

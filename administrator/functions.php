@@ -31,33 +31,28 @@ function curPageURL() {
 /* Index administrator */
 function getNumberObject($obj_type) {
 	include_once('includes/databases.php');
-	$link = connectDB('localhost', 'fimo', 'postgres', '123456');
 
-	$query = "SELECT COUNT(*) FROM object WHERE type = '$obj_type'";
-	$rows = pg_query($query);
+	$selects = array('COUNT(*)');
+	$wheres = array('type' => $obj_type);
+	$rows = viewTable('fimo', 'object', $selects, $wheres);
 
 	if (pg_num_rows($rows) == 1) {
 		$row = pg_fetch_array($rows);
-		closeDB($link);
 		return $row[0];
 	}
-	closeDB($link);
 	return false;
 }
 
 function getNumberUser() {
-	include_once('includes/databases.php');
-	$link = connectDB('localhost', 'fimo', 'postgres', '123456');
-
-	$query = "SELECT COUNT(*) FROM users";
-	$rows = pg_query($query);
+	$selects = array('COUNT(*)');
+	$rows = viewTable('fimo', 'users', $selects);
+	if($rows === false) return false;
 
 	if (pg_num_rows($rows) == 1) {
 		$row = pg_fetch_array($rows);
-		closeDB($link);
 		return $row[0];
 	}
-	closeDB($link);
+
 	return false;
 }
 
@@ -107,6 +102,7 @@ function addNewForm($obj_type) { ?>
 							<option value="publish">Publish</option>
 							<option value="delete">Delete</option>
 						</select>
+						<input type="hidden" name="object_type" value="<?php echo $obj_type; ?>">
 						<input type="submit" value="Apply" class="button fl has-border-radius" style="padding: 7px 10px 6px; margin-left: 10px;">
 					</div>
 					<div class="grid-4 table">
@@ -127,7 +123,7 @@ function addNewForm($obj_type) { ?>
 									<div class="grid-3-16"><?php echo $row['id'] ?></div>
 									<div class="grid-1-4"><?php echo $row['name'] ?></div>
 									<div class="grid-1-4"><?php echo $row['slug'] ?><input type="hidden" name="slug" value="<?php echo $row['slug'] ?>"></div>
-									<div class="grid-1-4"><?php echo $row['desc'] ?></div>
+									<div class="grid-1-4"><?php echo @$row['desc'] ?></div>
 								</div> 
 							<?php }
 						}
@@ -155,18 +151,20 @@ function addNewForm($obj_type) { ?>
 
 function getObjects($obj_type) {
 	include_once('includes/databases.php');
-	$link = connectDB('localhost', 'fimo', 'postgres', '123456');
 
-	$query = "SELECT id, name, slug, workspace, description as desc FROM object WHERE type = '$obj_type' AND publish IS true";
-	$rows = pg_query($query);
+	$selects = array( 'id', 'name', 'slug', 'workspace', 'description' );
+	$wheres = array(
+		'type' => $obj_type,
+		'publish' => 1
+	);
+	$rows = viewTable('fimo', 'object', $selects, $wheres);
+	if($rows === false) return false;
 
-	if (pg_num_rows($rows) >= 1) {
-		closeDB($link);
+	if (pg_num_rows($rows) >= 1)
 		return $rows;
-	}
-	closeDB($link);
 	return false;
 }
+
 /* Ajax call PHP functions */
 if(isset($_POST['action']) && !empty($_POST['action'])) {
 	$action = $_POST['action'];
@@ -191,59 +189,70 @@ function addNewObject($datas) {
 	}
 
 	include_once('includes/databases.php');
-	$link = connectServer('localhost', 'postgres', '123456');
 
-	$query = "CREATE DATABASE " . $slug;
-	$result = pg_query($query);
-
+	$result = createDB($slug);
 	if($result) {
-		$query = "COMMENT ON DATABASE $slug IS '$desc'";
-		$result = pg_query($query);
-		if($result) {
-			$link_more = connectDB('localhost', 'fimo', 'postgres', '123456');
-			$query = "INSERT INTO object (name, slug, type, workspace, description) VALUES ('$name', '$slug', '$type', '$workspace', '$desc')";
-			$result = pg_query($query);
-			if($result) {
-				closeDB($link_more);
+		$result_1 = commentDB($slug, $desc);
+		if($result_1) {
+			$args = array(
+				'name' => $name,
+				'slug' => $slug,
+				'type' => $type,
+				'workspace' => $workspace,
+				'description' => $desc
+			);
+			$result_2 = insertTable('fimo', 'object', $args);
+			if($result_2) {
+				echo 'success';
 			}
+			else echo 'fail_insert_tb';
 		}
-		closeDB($link);
-		echo 'success';
+		else echo 'fail_comment';
 	}
-	echo 'fail';
+	else echo 'fail_create_db';
 }
+
 function deleteObject($datas) {
 	$ids = array();
 	$slugs = array();
+	$obj_type = '';
+	$check = '';
 	for ($i=0; $i < sizeof($datas); $i++) { 
-		if($datas[$i]['name'] != 'action' && $datas[$i]['name'] != 'select-all' && $datas[$i]['name'] != 'slug') {
+		if($datas[$i]['name'] != 'action' && $datas[$i]['name'] != 'select-all' && $datas[$i]['name'] != 'slug' && $datas[$i]['name'] != 'object_type') {
 			array_push($ids, substr($datas[$i]['name'], strpos($datas[$i]['name'], '-')+1));
 		}
-		if($datas[$i]['name'] != 'slug') {
+		if($datas[$i]['name'] == 'slug') {
 			array_push($slugs, $datas[$i]['value']);
 		}
+		if($datas[$i]['name'] == 'object_type')
+			$obj_type = $datas[$i]['value'];
 	}
 
-	/*include_once('includes/databases.php');
-	$link_table = connectDB('localhost', 'fimo', 'postgres', '123456');
-	$link_server = connectServer('localhost', 'postgres', '123456');
+	include_once('includes/databases.php');
 
-	$query_delete_object = 'DELETE FROM object WHERE id = ';
-	$query_delete_db = 'DROP DATABASE IF EXISTS ';
-
-	foreach($slugs as $i => $val) { 
-		$result_1 = pg_query($link_table, $query_delete_object . $ids[$i]);
-		if ($result_1) {
-			$result_2 = pg_query($link_server, $query_delete_db . $val);
-			if ($result_2) {
-				echo 'success';
+	foreach ($slugs as $i => $val) {
+		$wheres = array('id' => $ids[$i]);
+		$result_del_obj = dropRecords('fimo', 'object', $wheres);
+		if($result_del_obj) {
+			if($obj_type == 'workspace') {
+				$result_del_db = dropDB($val);
+				if($result_del_db)
+					$check = 'success';
+				else {
+					$check = 'fail_del_db';
+					break;
+				}
 			}
+			else $check = 'success';
 		}
-		else echo 'fail';
+		else {
+			$check = 'fail_del_obj';
+			break;
+		}
 	}
-	closeDB($link_server);
-	closeDB($link_table);*/
 	
+	echo $check;
 }
+
 /* String */
 ?>
