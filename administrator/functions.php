@@ -224,7 +224,7 @@ function deleteObject($datas) {
 		}
 	}
 
-	include_once('includes/databases.php');
+	/*include_once('includes/databases.php');
 	$link_table = connectDB('localhost', 'fimo', 'postgres', '123456');
 	$link_server = connectServer('localhost', 'postgres', '123456');
 
@@ -242,7 +242,8 @@ function deleteObject($datas) {
 		else echo 'fail';
 	}
 	closeDB($link_server);
-	closeDB($link_table);
+	closeDB($link_table);*/
+	
 }
 /* String */
 ?>
