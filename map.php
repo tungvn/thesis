@@ -146,7 +146,7 @@
 		
 		<!-- Openlayers -->
 		<!--<script type="text/javascript" src="http://localhost:8080/geoserver/openlayers/OpenLayers.js"></script>-->
-		<script type="text/javascript" src="http://openlayers.org/dev/OpenLayers.js"></script>
+		<script type="text/javascript" src="js/OpenLayers.js"></script>
 		<script src="js/base.js"></script>
 		<script src="js/layer.js"></script>
 
