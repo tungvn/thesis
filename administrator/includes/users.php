@@ -109,10 +109,5 @@ function update() {
 	
 }
 
-/* Current user */
-function currentUserID() {
-	@session_start();
-	$current_user_id = substr($_SESSION['user_id'], strpos($_SESSION['user_id'], '-')+1);
-	return $current_user_id;
-}
+
 ?>

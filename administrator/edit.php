@@ -28,7 +28,7 @@ include_once('functions.php');?>
 				<li><a href="#">Option 2</a></li>
 			</ul>
 			<div class="user_menu fr">
-				<a href="#">admin</a>
+				<a href="#"><?php echo getCurrentUserID(); ?></a>
 				<a href="login.php?action=logout">Log out</a>
 			</div>
 		</div>
@@ -46,7 +46,7 @@ include_once('functions.php');?>
 			</div>
 			<div class="main_body grid-4">
 				<div class="container">
-					<?php if(is_admin() && isset($_GET['obj'])): ?>
+					<?php if(isset($_GET['obj'])): ?>
 					<h2 class="div-title"><?php echo ucfirst($_GET['obj']); ?></h2>
 					<div id="notification" class="grid-4">
 						<div class="container">
@@ -56,11 +56,12 @@ include_once('functions.php');?>
 							<p><?php echo @$_POST['notification']; ?></p>
 						</div>
 					</div>
-					<?php if($_GET['obj'] == 'workspace'): ?>
-						<?php addNewForm($_GET['obj']); ?>
-					<?php elseif($_GET['obj'] == 'layer'): ?>
-						<?php addNewForm($_GET['obj']); ?>
-					<?php endif; endif; ?>
+					<?php if((is_admin() || is_moder() || is_editor()) && $_GET['obj'] == 'workspace')
+						addNewForm($_GET['obj']);
+					elseif((is_admin() || is_moder() || is_editor()) && $_GET['obj'] == 'layer')
+						addNewForm($_GET['obj']);
+					else
+					?>
 				</div>
 			</div>
 		</div>

@@ -1,5 +1,14 @@
 <?php 
 /* Access */
+/*
+Order Role from Highest to Lowest
+	1. administrator -- full setting
+	2. moderator -- full setting, expect any users' setting
+	3. editor -- full editing available workspaces, layers information 
+					but can NOT create or remove ones
+	4. publisher -- only publish available infomations, expect users verify
+	5. subscriber -- only view infomations, can NOT action with anything
+*/
 function is_admin() {
 	@session_start();
 	if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == true) 
@@ -40,6 +49,13 @@ function is_logged_in() {
 	if (isset($_SESSION['authorized']) && $_SESSION['authorized'] == true) 
 		return true;
 	else return false;
+}
+
+/* Current user */
+function getCurrentUserID() {
+	@session_start();
+	$current_user_id = substr($_SESSION['user_id'], strpos($_SESSION['user_id'], '-')+1);
+	return $current_user_id;
 }
 
 function curPageURL() {
@@ -125,12 +141,14 @@ function addNewForm($obj_type) { ?>
 				<h3 class="div-title">Lists of <?php echo $obj_type; ?></h3>
 				<form class="grid-4 list-object" method="POST">
 					<div class="grid-4">
+						<?php if(is_admin() || is_moder()): ?>
 						<select name="action" id="action" class="grid-1-4 has-border has-border-radius">
 							<option value=""></option>
 							<option value="delete">Delete</option>
 						</select>
 						<input type="hidden" name="object_type" value="<?php echo $obj_type; ?>">
 						<input type="submit" value="Apply" class="button fl has-border-radius" style="padding: 7px 10px 6px; margin-left: 10px;">
+						<?php endif; ?>
 					</div>
 					<div class="grid-4 table">
 						<div class="grid-4 thead has-border">

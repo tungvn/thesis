@@ -28,7 +28,7 @@ include_once('functions.php');?>
 				<li><a href="#">Option 2</a></li>
 			</ul>
 			<div class="user_menu fr">
-				<a href="#">admin</a>
+				<a href="#"><?php echo getCurrentUserID(); ?></a>
 				<a href="login.php?action=logout">Log out</a>
 			</div>
 		</div>
@@ -56,33 +56,44 @@ include_once('functions.php');?>
 							<p><?php echo @$_POST['notification']; ?></p>
 						</div>
 					</div>
-					<?php if(is_admin()): ?>
-						<!-- dashboard -->
-						<div class="grid-1">
-							<div class="container has-border has-border-radius">
-								<h3 class="div-title">Workspace</h3>
-								<div class="the-content fl">
-									<p>We have <a href="edit.php?obj=workspace"><?php echo getNumberObject('workspace'); ?></a> workspace(s). <a class="button has-border-radius" href="edit.php?obj=workspace">Add New Workspace</a></p>
-								</div>
+					<!-- dashboard -->
+					<div class="grid-1">
+						<div class="container has-border has-border-radius">
+							<h3 class="div-title">Workspace</h3>
+							<div class="the-content fl">
+								<p>
+									We have <a href="edit.php?obj=workspace"><?php echo getNumberObject('workspace'); ?></a> workspace(s). 
+									<?php if(is_admin() || is_moder()): ?>
+									<a class="button has-border-radius" href="edit.php?obj=workspace">Add New Workspace</a>
+									<?php endif; ?>
+								</p>
 							</div>
 						</div>
-						<div class="grid-1">
-							<div class="container has-border has-border-radius">
-								<h3 class="div-title">Layers</h3>
-								<div class="the-content fl">
-									<p>We have <a href="edit.php?obj=layer"><?php echo getNumberObject('layer'); ?></a> layer(s). <a class="button has-border-radius" href="edit.php?obj=layer">Add New Layer</a></p>
-								</div>
+					</div>
+					<div class="grid-1">
+						<div class="container has-border has-border-radius">
+							<h3 class="div-title">Layers</h3>
+							<div class="the-content fl">
+								<p>We have <a href="edit.php?obj=layer"><?php echo getNumberObject('layer'); ?></a> layer(s). 
+									<?php if(is_admin() || is_moder()): ?>
+									<a class="button has-border-radius" href="edit.php?obj=layer">Add New Layer</a>
+									<?php endif; ?>
+								</p>
 							</div>
 						</div>
-						<div class="grid-1">
-							<div class="container has-border has-border-radius">
-								<h3 class="div-title">User</h3>
-								<div class="the-content fl">
-									<p>We have <a href="edit.php?obj=user"><?php echo getNumberUser(); ?></a> user(s). <a class="button has-border-radius" href="edit.php?obj=user">Add New User</a></p>
-								</div>
+					</div>
+					<div class="grid-1">
+						<div class="container has-border has-border-radius">
+							<h3 class="div-title">User</h3>
+							<div class="the-content fl">
+								<p>We have <a href="edit.php?obj=user"><?php echo getNumberUser(); ?></a> user(s). 
+									<?php if(is_admin()): ?>
+									<a class="button has-border-radius" href="edit.php?obj=user">Add New User</a>
+									<?php endif; ?>
+								</p>
 							</div>
 						</div>
-					<?php endif; ?>
+					</div>
 				</div>
 			</div>
 		</div>

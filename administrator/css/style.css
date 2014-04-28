@@ -310,6 +310,9 @@ span.required:after {
 #object form.grid-4 input[type="submit"] {
 	padding: 10px 20px;
 }
+#object form.list-object {
+	margin-top: 20px;
+}
 #object .list-object .table .thead,
 #object .list-object .table .tbody,
 #object .list-object .table .tbody .row {
