@@ -57,11 +57,14 @@ include_once('functions.php');?>
 						</div>
 					</div>
 					<?php if((is_admin() || is_moder() || is_editor()) && $_GET['obj'] == 'workspace')
-						addNewForm($_GET['obj']);
+						edit($_GET['obj']);
 					elseif((is_admin() || is_moder() || is_editor()) && $_GET['obj'] == 'layer')
-						addNewForm($_GET['obj']);
+						edit($_GET['obj']);
+					elseif(is_admin() && $_GET['obj'] == 'users')
+						edit($_GET['obj']);
 					else
-					?>
+						echo 'Access denied!';
+					endif; ?>
 				</div>
 			</div>
 		</div>

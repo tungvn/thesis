@@ -47,18 +47,27 @@ include_once('functions.php');?>
 			</div>
 			<div class="main_body grid-4">
 				<div class="container">
-					<h2 class="div-title">Dashboard</h2>
+					<?php if(isset($_GET['obj']) && isset($_GET[$_GET['obj']])): 
+					$obj_type = $_GET['obj']; 
+					$obj = $_GET[$_GET['obj']]; ?>
+					<h2 class="div-title"><?php echo ucfirst($obj_type) . ' > <span style="color: #1155ff;">' . $obj . '</span>'; ?></h2>
 					<div id="notification" class="grid-4">
-						<div class="container has-border has-border-radius">
+						<div class="container">
 							<span class="info fl hidden"></span>
 							<span class="error fl hidden"></span>
 							<span class="warning fl hidden"></span>
 							<p><?php echo @$_POST['notification']; ?></p>
 						</div>
 					</div>
-					<?php if(is_admin()): ?>
-						
-					<?php endif; ?>
+					<?php if((is_admin() || is_moder() || is_editor()) && $obj_type == 'workspace')
+						single($obj_type, $obj);
+					elseif((is_admin() || is_moder() || is_editor()) && $obj_type == 'layer')
+						single($obj_type, $obj);
+					elseif(is_admin() && $obj_type == 'users')
+						single($obj_type, $obj);
+					else
+						echo 'Access denied!';
+					endif; ?>
 				</div>
 			</div>
 		</div>

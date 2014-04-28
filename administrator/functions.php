@@ -99,113 +99,128 @@ function getNumberUser() {
 
 	return false;
 }
-
+/*-------------------------------------edit.php-------------------------------------------------*/
 /* Edit administrator */
 function addNewForm($obj_type) { ?>
-	<div id="object">
-		<div class="grid-1">
-			<div class="container">
-				<h3 class="div-title">Add new <?php echo $obj_type; ?></h3>
-				<form class="grid-4 add-new-object" method="POST">
-					<label class="grid-4" for="name">Name<span class="required"></span></label>
-					<input class="grid-4 has-border has-border-radius" type="text" name="name" id="name" required>
-					<label class="grid-4" for="slug">Slug</label>
-					<input class="grid-4 has-border has-border-radius" type="text" name="slug" id="slug">
-					<input type="hidden" name="type" id="type" value="<?php echo $obj_type; ?>">
-					<?php if($obj_type == 'layer'): ?>
-					<label class="grid-4" for="workspace">Workspace<span class="required"></span></label>
-					<select name="workspace" id="workspace" class="grid-4 has-border has-border-radius" required>
-						<option value=""></option><?php $rows = getObjects('workspace'); 
-						if($rows):
-							$i = 0;
-							while ($row = pg_fetch_array($rows)): ?>
-							<option value="<?php echo $row['id']; ?>"><?php echo $row['name']; ?></option>
-						<?php endwhile; endif; ?>
-					</select>
-					<label class="grid-4" for="shpfile">Shapefile (.shp)<span class="required"></span></label>
-					<input class="grid-4 has-border has-border-radius" type="file" name="shpfile" id="shpfile" required accept=".shp">
-					<label for="publish" class="grid-4">Publish</label>
-					<select name="publish" id="publish" class="grid-4 has-border has-border-radius">
-						<option value="publish">Publish</option>
-						<option value="unpublish">Unpublish</option>
-					</select>
-					<?php endif; ?>
-					<label class="grid-4" for="description">Description</label>
-					<textarea class="grid-4 has-border has-border-radius" name="description" id="description" rows="10" style="resize: none;"></textarea>
-					<input class="button has-border-radius" type="submit" value="Create">
-				</form>
+	<div class="container">
+		<h3 class="div-title">Add new <?php echo $obj_type; ?></h3>
+		<form class="grid-4 add-new-object" method="POST">
+			<label class="grid-4" for="name">Name<span class="required"></span></label>
+			<input class="grid-4 has-border has-border-radius" type="text" name="name" id="name" required>
+			<label class="grid-4" for="slug">Slug</label>
+			<input class="grid-4 has-border has-border-radius" type="text" name="slug" id="slug">
+			<input type="hidden" name="type" id="type" value="<?php echo $obj_type; ?>">
+			<?php if($obj_type == 'layer'): ?>
+			<label class="grid-4" for="workspace">Workspace<span class="required"></span></label>
+			<select name="workspace" id="workspace" class="grid-4 has-border has-border-radius" required>
+				<option value=""></option><?php $rows = getObjects('workspace'); 
+				if($rows):
+					$i = 0;
+					while ($row = pg_fetch_array($rows)): ?>
+					<option value="<?php echo $row['id']; ?>"><?php echo $row['name']; ?></option>
+				<?php endwhile; endif; ?>
+			</select>
+			<label class="grid-4" for="shpfile">Shapefile (.shp)<span class="required"></span></label>
+			<input class="grid-4 has-border has-border-radius" type="file" name="shpfile" id="shpfile" required accept=".shp">
+			<label for="publish" class="grid-4">Publish</label>
+			<select name="publish" id="publish" class="grid-4 has-border has-border-radius">
+				<option value="publish">Publish</option>
+				<option value="unpublish">Unpublish</option>
+			</select>
+			<?php endif; ?>
+			<label class="grid-4" for="description">Description</label>
+			<textarea class="grid-4 has-border has-border-radius" name="description" id="description" rows="10" style="resize: none;"></textarea>
+			<input class="button has-border-radius" type="submit" value="Create">
+		</form>
+	</div>
+	<?php
+}
+function listObject($obj_type) { ?>
+	<div class="container">
+		<h3 class="div-title">Lists of <?php echo $obj_type; ?></h3>
+		<form class="grid-4 list-object" method="POST">
+			<div class="grid-4">
+				<?php if(is_admin() || is_moder()): ?>
+				<select name="action" id="action" class="grid-1-4 has-border has-border-radius">
+					<option value=""></option>
+					<option value="delete">Delete</option>
+				</select>
+				<input type="hidden" name="object_type" value="<?php echo $obj_type; ?>">
+				<input type="submit" value="Apply" class="button fl has-border-radius" style="padding: 7px 10px 6px; margin-left: 10px;">
+				<?php endif; ?>
 			</div>
+			<div class="grid-4 table">
+				<div class="grid-4 thead has-border">
+					<div class="grid-1-16"><input type="checkbox" name="select-all" id="select-all"></div>
+					<div class="grid-3-16"><p>ID</p></div>
+					<div class="grid-1-4"><p>Name</p></div>
+					<div class="grid-1-4"><p>Slug</p></div>
+					<div class="grid-1-4"><p>Description</p></div>
+				</div>
+				<div class="grid-4 tbody">
+				<?php $paged = isset($_GET['paged']) ? $_GET['paged'] : 1;
+				$rows = getObjects($obj_type, 10, ($paged-1)*10); 
+				if($rows) {
+					$i = 0;
+					while ($row = pg_fetch_array($rows)) { ?>
+						<div class="grid-4 row">
+							<div class="grid-1-16"><input type="checkbox" name="<?php echo $obj_type . '-' . $row['id']; ?>" id="select[<?php echo $i++; ?>]"></div>
+							<div class="grid-3-16"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['slug']; ?>"><?php echo $row['id'] ?></a></div>
+							<div class="grid-1-4"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['slug']; ?>"><?php echo $row['name'] ?></a></div>
+							<div class="grid-1-4"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['slug']; ?>"><?php echo $row['slug'] ?></a></div>
+							<div class="grid-1-4"><?php echo @$row['desc'] ?></div>
+						</div> 
+					<?php }
+				}
+				else { ?>
+					<div class="grid-4 row">
+						<p>No object found</p>
+					</div>
+				<?php } ?>
+				</div>
+				<?php $selects = array('COUNT(*)'); 
+				$wheres = array('type' => $obj_type, 'publish' => 1);
+				$rows = getRecords('fimo', 'object', $selects, $wheres);
+				if($rows === false) return false;
+
+				if (pg_num_rows($rows) == 1)
+					$row = pg_fetch_array($rows);
+				$sum = $row[0];
+				$number_page = (int) ($sum / 10);
+
+				if($number_page > 0): ?>
+				<div id="pagination" class="grid-4 tfoot has-border">
+					<ul class="fr">
+						<?php for($i=1;$i <= $number_page+1;$i++):
+						$current = ($i == $paged) ? 'current-item' : '';  ?>
+						<li class="fl <?php echo $current; ?>"><a href="edit.php?obj=<?php echo $obj_type; ?>&amp;paged=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+						<?php endfor; ?>
+					</ul>
+				</div>
+				<?php endif; ?>
+			</div>
+		</form>
+	</div>
+	<?php
+}
+function edit($obj_type) { ?>
+	<div id="object">
+		<?php if(is_admin() || is_moder()): ?>
+		<div class="grid-1">
+			<?php addNewForm($obj_type); ?>
 		</div>
 		<div class="grid-3">
-			<div class="container">
-				<h3 class="div-title">Lists of <?php echo $obj_type; ?></h3>
-				<form class="grid-4 list-object" method="POST">
-					<div class="grid-4">
-						<?php if(is_admin() || is_moder()): ?>
-						<select name="action" id="action" class="grid-1-4 has-border has-border-radius">
-							<option value=""></option>
-							<option value="delete">Delete</option>
-						</select>
-						<input type="hidden" name="object_type" value="<?php echo $obj_type; ?>">
-						<input type="submit" value="Apply" class="button fl has-border-radius" style="padding: 7px 10px 6px; margin-left: 10px;">
-						<?php endif; ?>
-					</div>
-					<div class="grid-4 table">
-						<div class="grid-4 thead has-border">
-							<div class="grid-1-16"><input type="checkbox" name="select-all" id="select-all"></div>
-							<div class="grid-3-16"><p>ID</p></div>
-							<div class="grid-1-4"><p>Name</p></div>
-							<div class="grid-1-4"><p>Slug</p></div>
-							<div class="grid-1-4"><p>Description</p></div>
-						</div>
-						<div class="grid-4 tbody">
-						<?php $paged = isset($_GET['paged']) ? $_GET['paged'] : 1;
-						$rows = getObjects($obj_type, 10, ($paged-1)*10); 
-						if($rows) {
-							$i = 0;
-							while ($row = pg_fetch_array($rows)) { ?>
-								<div class="grid-4 row">
-									<div class="grid-1-16"><input type="checkbox" name="<?php echo $obj_type . '-' . $row['id']; ?>" id="select[<?php echo $i++; ?>]"></div>
-									<div class="grid-3-16"><?php echo $row['id'] ?></div>
-									<div class="grid-1-4"><?php echo $row['name'] ?></div>
-									<div class="grid-1-4"><?php echo $row['slug'] ?></div>
-									<div class="grid-1-4"><?php echo @$row['desc'] ?></div>
-								</div> 
-							<?php }
-						}
-						else { ?>
-							<div class="grid-4 row">
-								<p>No object found</p>
-							</div>
-						<?php } ?>
-						</div>
-						<?php $selects = array('COUNT(*)'); 
-						$wheres = array('type' => $obj_type, 'publish' => 1);
-						$rows = getRecords('fimo', 'object', $selects, $wheres);
-						if($rows === false) return false;
-
-						if (pg_num_rows($rows) == 1)
-							$row = pg_fetch_array($rows);
-						$sum = $row[0];
-						$number_page = (int) ($sum / 10);
-
-						if($number_page > 0):?>
-						<div id="pagination" class="grid-4 tfoot has-border">
-							<ul class="fr">
-								<?php for($i=1;$i <= $number_page+1;$i++):
-								$current = ($i == $paged) ? 'current-item' : '';  ?>
-								<li class="fl <?php echo $current; ?>"><a href="edit.php?obj=<?php echo $obj_type; ?>&amp;paged=<?php echo $i; ?>"><?php echo $i; ?></a></li>
-								<?php endfor; ?>
-							</ul>
-						</div>
-						<?php endif; ?>
-					</div>
-				</form>
-			</div>
+			<?php listObject($obj_type); ?>
 		</div>
+		<?php elseif(is_editor()): ?>
+		<div class="grid-4">
+			<?php listObject($obj_type); ?>
+		</div>
+		<?php endif; ?>
 	</div>
 <?php
 }
+
 
 function getObjects($obj_type, $limit = 99999, $offset = 0) {
 	include_once('includes/databases.php');
@@ -222,6 +237,19 @@ function getObjects($obj_type, $limit = 99999, $offset = 0) {
 		return $rows;
 	return false;
 }
+
+/*-------------------------------------edit.php-------------------------------------------------*/
+
+
+
+/*-------------------------------------single.php-----------------------------------------------*/
+function single($obj_type, $obj) {
+	echo $obj_type . '<br>' .$obj;
+}
+
+
+/*-------------------------------------single.php-----------------------------------------------*/
+
 
 /* Ajax call PHP functions */
 if(isset($_POST['action']) && !empty($_POST['action'])) {

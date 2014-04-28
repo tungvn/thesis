@@ -105,7 +105,7 @@ function register($username, $password, $email) {
 }
 
 /* Update users */
-function update() {
+function update($new_info) {
 	
 }
 
