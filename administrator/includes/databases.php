@@ -5,7 +5,7 @@ All scripts of databases.
 // Connect to server
 function connectServer($host, $user, $pass) {
 	$query = 'host=' . $host . ' user=' . $user . ' password=' . $pass;
-	$link = pg_connect($query) or die();
+	$link = pg_connect($query, PGSQL_CONNECT_FORCE_NEW);
 	return $link;
 }
 // Databases
@@ -36,6 +36,8 @@ function renameDB($old_name, $new_name) {
 }
 
 function dropDB($name) {
+	if(@pg_dbname())
+		closeDB(pg_dbname());
 	$link = connectServer('localhost', 'postgres', '123456');
 	if(!$link) return false;
 
@@ -67,7 +69,7 @@ function updateDB($options = array()) {
 
 function connectDB($host, $dbname, $user, $pass) {
 	$query = 'host=' . $host . ' dbname=' . $dbname . ' user=' . $user . ' password=' . $pass;
-	$link = pg_connect($query) or die();
+	$link = pg_connect($query);
 	return $link;
 }
 
@@ -98,7 +100,7 @@ function dropTable($namedb, $nametb) {
 }
 
 // Records
-function insertTable($namedb, $nametb, $args = array()) {
+function insertRecords($namedb, $nametb, $args = array()) {
 	$link = connectDB('localhost', $namedb, 'postgres', '123456');
 	if(!$link) return false;
 
@@ -126,8 +128,7 @@ function insertTable($namedb, $nametb, $args = array()) {
 	return false;
 }
 
-// View table
-function viewTable($namedb, $nametb, $selects = array('*'), $wheres = array()) {
+function getRecords($namedb, $nametb, $selects = array('*'), $wheres = array(), $limit = 99999, $offset = 0) {
 	$link = connectDB('localhost', $namedb, 'postgres', '123456');
 	if(!$link) return false;
 
@@ -158,6 +159,7 @@ function viewTable($namedb, $nametb, $selects = array('*'), $wheres = array()) {
 	$query = "SELECT $sel FROM $nametb";
 	if(sizeof($wheres) > 0) 
 		$query .= " WHERE $whe";
+	$query .= " LIMIT $limit OFFSET $offset";
 	$result = pg_query($link, $query);
 
 	closeDB($link);

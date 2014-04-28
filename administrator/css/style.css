@@ -255,11 +255,11 @@ span.required:after {
 #body {
 	width: 100%;
 	background-color: #ffffff;
+	min-height: 700px;
 }
 #body .left_menu {
 	width: 13%;
 	height: 100%;
-	min-height: 400px;
 	position: relative;
 	background-color: #222222;
 }
@@ -287,6 +287,7 @@ span.required:after {
 }
 #body .main_body {
 	width: 87%;
+	min-height: 600px;
 	height: 100%;
 }
 /* Edit administrator */

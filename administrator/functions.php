@@ -7,6 +7,34 @@ function is_admin() {
 	else return false;
 }
 
+function is_moder() {
+	@session_start();
+	if (isset($_SESSION['is_moder']) && $_SESSION['is_moder'] == true) 
+		return true;
+	else return false;
+}
+
+function is_editor() {
+	@session_start();
+	if (isset($_SESSION['is_editor']) && $_SESSION['is_editor'] == true) 
+		return true;
+	else return false;
+}
+
+function is_publisher() {
+	@session_start();
+	if (isset($_SESSION['is_publisher']) && $_SESSION['is_publisher'] == true) 
+		return true;
+	else return false;
+}
+
+function is_subscriber() {
+	@session_start();
+	if (isset($_SESSION['is_subscriber']) && $_SESSION['is_subscriber'] == true) 
+		return true;
+	else return false;
+}
+
 function is_logged_in() {
 	@session_start();
 	if (isset($_SESSION['authorized']) && $_SESSION['authorized'] == true) 
@@ -34,7 +62,7 @@ function getNumberObject($obj_type) {
 
 	$selects = array('COUNT(*)');
 	$wheres = array('type' => $obj_type);
-	$rows = viewTable('fimo', 'object', $selects, $wheres);
+	$rows = getRecords('fimo', 'object', $selects, $wheres);
 
 	if (pg_num_rows($rows) == 1) {
 		$row = pg_fetch_array($rows);
@@ -45,7 +73,7 @@ function getNumberObject($obj_type) {
 
 function getNumberUser() {
 	$selects = array('COUNT(*)');
-	$rows = viewTable('fimo', 'users', $selects);
+	$rows = getRecords('fimo', 'users', $selects);
 	if($rows === false) return false;
 
 	if (pg_num_rows($rows) == 1) {
@@ -99,7 +127,6 @@ function addNewForm($obj_type) { ?>
 					<div class="grid-4">
 						<select name="action" id="action" class="grid-1-4 has-border has-border-radius">
 							<option value=""></option>
-							<option value="publish">Publish</option>
 							<option value="delete">Delete</option>
 						</select>
 						<input type="hidden" name="object_type" value="<?php echo $obj_type; ?>">
@@ -114,7 +141,8 @@ function addNewForm($obj_type) { ?>
 							<div class="grid-1-4"><p>Description</p></div>
 						</div>
 						<div class="grid-4 tbody">
-						<?php $rows = getObjects($obj_type); 
+						<?php $paged = isset($_GET['paged']) ? $_GET['paged'] : 1;
+						$rows = getObjects($obj_type, 10, ($paged-1)*10); 
 						if($rows) {
 							$i = 0;
 							while ($row = pg_fetch_array($rows)) { ?>
@@ -122,7 +150,7 @@ function addNewForm($obj_type) { ?>
 									<div class="grid-1-16"><input type="checkbox" name="<?php echo $obj_type . '-' . $row['id']; ?>" id="select[<?php echo $i++; ?>]"></div>
 									<div class="grid-3-16"><?php echo $row['id'] ?></div>
 									<div class="grid-1-4"><?php echo $row['name'] ?></div>
-									<div class="grid-1-4"><?php echo $row['slug'] ?><input type="hidden" name="slug" value="<?php echo $row['slug'] ?>"></div>
+									<div class="grid-1-4"><?php echo $row['slug'] ?></div>
 									<div class="grid-1-4"><?php echo @$row['desc'] ?></div>
 								</div> 
 							<?php }
@@ -133,14 +161,26 @@ function addNewForm($obj_type) { ?>
 							</div>
 						<?php } ?>
 						</div>
-						<div class="grid-4 tfoot has-border">
+						<?php $selects = array('COUNT(*)'); 
+						$wheres = array('type' => $obj_type, 'publish' => 1);
+						$rows = getRecords('fimo', 'object', $selects, $wheres);
+						if($rows === false) return false;
+
+						if (pg_num_rows($rows) == 1)
+							$row = pg_fetch_array($rows);
+						$sum = $row[0];
+						$number_page = (int) ($sum / 10);
+
+						if($number_page > 0):?>
+						<div id="pagination" class="grid-4 tfoot has-border">
 							<ul class="fr">
-								<li class="fl current-item"><a href="#">1</a></li>
-								<li class="fl"><a href="#">2</a></li>
-								<li class="fl"><a href="#">3</a></li>
-								<li class="fl"><a href="#">4</a></li>
+								<?php for($i=1;$i <= $number_page+1;$i++):
+								$current = ($i == $paged) ? 'current-item' : '';  ?>
+								<li class="fl <?php echo $current; ?>"><a href="edit.php?obj=<?php echo $obj_type; ?>&amp;paged=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+								<?php endfor; ?>
 							</ul>
 						</div>
+						<?php endif; ?>
 					</div>
 				</form>
 			</div>
@@ -149,7 +189,7 @@ function addNewForm($obj_type) { ?>
 <?php
 }
 
-function getObjects($obj_type) {
+function getObjects($obj_type, $limit = 99999, $offset = 0) {
 	include_once('includes/databases.php');
 
 	$selects = array( 'id', 'name', 'slug', 'workspace', 'description' );
@@ -157,7 +197,7 @@ function getObjects($obj_type) {
 		'type' => $obj_type,
 		'publish' => 1
 	);
-	$rows = viewTable('fimo', 'object', $selects, $wheres);
+	$rows = getRecords('fimo', 'object', $selects, $wheres, $limit, $offset);
 	if($rows === false) return false;
 
 	if (pg_num_rows($rows) >= 1)
@@ -201,7 +241,7 @@ function addNewObject($datas) {
 				'workspace' => $workspace,
 				'description' => $desc
 			);
-			$result_2 = insertTable('fimo', 'object', $args);
+			$result_2 = insertRecords('fimo', 'object', $args);
 			if($result_2) {
 				echo 'success';
 			}
@@ -217,12 +257,10 @@ function deleteObject($datas) {
 	$slugs = array();
 	$obj_type = '';
 	$check = '';
+	
 	for ($i=0; $i < sizeof($datas); $i++) { 
-		if($datas[$i]['name'] != 'action' && $datas[$i]['name'] != 'select-all' && $datas[$i]['name'] != 'slug' && $datas[$i]['name'] != 'object_type') {
+		if($datas[$i]['name'] != 'action' && $datas[$i]['name'] != 'select-all' && $datas[$i]['name'] != 'object_type') {
 			array_push($ids, substr($datas[$i]['name'], strpos($datas[$i]['name'], '-')+1));
-		}
-		if($datas[$i]['name'] == 'slug') {
-			array_push($slugs, $datas[$i]['value']);
 		}
 		if($datas[$i]['name'] == 'object_type')
 			$obj_type = $datas[$i]['value'];
@@ -230,12 +268,25 @@ function deleteObject($datas) {
 
 	include_once('includes/databases.php');
 
-	foreach ($slugs as $i => $val) {
+	foreach ($ids as $i => $id) {
+		$selects = array('slug');
+		$wheres = array('id' => $id);
+		$rows = getRecords('fimo', 'object', $selects, $wheres);
+		if($rows === false) return false;
+
+		if (pg_num_rows($rows) > 0) {
+			while($row = pg_fetch_array($rows)) {
+				array_push($slugs, $row['slug']);
+			}
+		}
+	}
+	
+	foreach ($slugs as $i => $slug) {
 		$wheres = array('id' => $ids[$i]);
 		$result_del_obj = dropRecords('fimo', 'object', $wheres);
 		if($result_del_obj) {
 			if($obj_type == 'workspace') {
-				$result_del_db = dropDB($val);
+				$result_del_db = dropDB($slug);
 				if($result_del_db)
 					$check = 'success';
 				else {

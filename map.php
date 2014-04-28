@@ -218,7 +218,6 @@
 			});
 		});
 		</script>
-		<?php include_once 'functions.php'; ?>
 	</div>
 </body>
 </html>

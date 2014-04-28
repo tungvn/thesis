@@ -16,7 +16,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'logout')
 	<meta charset="utf-8">
 	<meta name="author" content="TungVN - Ngoc Tung Vu">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Fimo 2014 | Administrator</title>
+	<title>Thesis 2014 | Login  | Fimo Center</title>
 	<link rel="stylesheet" href="css/style.css">
 	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 	<script src="js/main.js"></script>

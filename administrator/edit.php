@@ -7,7 +7,7 @@ include_once('functions.php');?>
 	<meta charset="utf-8">
 	<meta name="author" content="TungVN - Ngoc Tung Vu">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Fimo 2014 | Administrator</title>
+	<title>Thesis 2014 | <?php echo ucfirst($_GET['obj']); ?> | Administrator | Fimo Center</title>
 	<link rel="stylesheet" href="css/style.css">
 	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 	<script src="js/main.js"></script>
@@ -39,7 +39,7 @@ include_once('functions.php');?>
 						<li><a href="index.php">Dashboard</a></li>
 						<li><a href="edit.php?obj=workspace">Workspaces</a></li>
 						<li><a href="edit.php?obj=layer">Layers</a></li>
-						<li><a href="edit.php?obj=user">Users</a></li>
+						<li><a href="edit.php?obj=users">Users</a></li>
 					</ul>
 					<p class="footer">&copy; Copyright by TungVN 2014</p>
 				</div>

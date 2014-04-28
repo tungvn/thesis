@@ -45,14 +45,17 @@ function login($username, $password, $redirect_to) {
 
 	//if match is equal to 1 there is a match
 	if (pg_num_rows($rows) == 1) {
+		$row = pg_fetch_array($rows);
 		//set session
 		$_SESSION['authorized'] = true;
-		// is admin user
-		$row = pg_fetch_assoc($rows);
-		if(strcmp(trim($row['access']), 'admin') == 0)
-			$_SESSION['is_admin'] = true;
-		else
-			$_SESSION['is_admin'] = false;
+		// is_role user
+		switch (trim($row['role'])) {
+			case 'administrator': $_SESSION['is_admin'] = true; break;
+			case 'moderator': $_SESSION['is_moder'] = true; break;
+			case 'editor': $_SESSION['is_editor'] = true; break;
+			case 'publisher': $_SESSION['is_publisher'] = true; break;
+			case 'subscriber': $_SESSION['is_subscriber'] = true; break;
+		}
 
 		// current user
 		$_SESSION["user_id"] = 'user-' . $row['id'];
@@ -79,9 +82,8 @@ function logout() {
 
 /* Register user */
 function register($username, $password, $email) {
-	$access = 'user'; //default is user
-
-	$link = connectDB('localhost', 'fimo', 'postgres', '123456');
+	//default is subscriber
+	$role = 'subscriber';
 
 	//call safestrip function
 	$user = safestrip($username);
@@ -91,13 +93,20 @@ function register($username, $password, $email) {
 	//convert password to md5
 	$pass = md5('vnt' . $pass);
 
-	// check if the user id and password combination exist in database
-	$rows = pg_query($link, "INSERT INTO users VALUES ('$user', '$pass', now(), '$access', '$email')") or die(pg_result_error());
+	// insert user to database
+	$args = array(
+		'username' => $user,
+		'email' => $email,
+		'password' => $pass
+	);
+	$result = insertRecords('fimo', 'users', $args);
 
-	//if match is equal to 1 there is a match
-	if ($rows)
-		return true;
-	return false;
+	return $result;
+}
+
+/* Update users */
+function update() {
+	
 }
 
 /* Current user */

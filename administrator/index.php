@@ -7,7 +7,7 @@ include_once('functions.php');?>
 	<meta charset="utf-8">
 	<meta name="author" content="TungVN - Ngoc Tung Vu">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Fimo 2014 | Administrator</title>
+	<title>Thesis 2014 | Dashboard | Administrator | Fimo Center</title>
 	<link rel="stylesheet" href="css/style.css">
 	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 	<script src="js/main.js"></script>
@@ -39,7 +39,7 @@ include_once('functions.php');?>
 						<li><a href="index.php">Dashboard</a></li>
 						<li><a href="edit.php?obj=workspace">Workspaces</a></li>
 						<li><a href="edit.php?obj=layer">Layers</a></li>
-						<li><a href="edit.php?obj=user">Users</a></li>
+						<li><a href="edit.php?obj=users">Users</a></li>
 					</ul>
 					<a href="javascript:void(0);"></a>
 					<p class="footer">&copy; Copyright by TungVN 2014</p>
@@ -48,11 +48,12 @@ include_once('functions.php');?>
 			<div class="main_body grid-4">
 				<div class="container">
 					<h2 class="div-title">Dashboard</h2>
-					<div id="notification" class="grid-4 hidden">
-						<div class="container has-border has-border-radius">
-							<span class="error fl"></span>
+					<div id="notification" class="grid-4">
+						<div class="container">
+							<span class="info fl hidden"></span>
+							<span class="error fl hidden"></span>
 							<span class="warning fl hidden"></span>
-							<p>Hello</p>
+							<p><?php echo @$_POST['notification']; ?></p>
 						</div>
 					</div>
 					<?php if(is_admin()): ?>

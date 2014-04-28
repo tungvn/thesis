@@ -1,17 +1,17 @@
 jQuery(document).ready(function($) {
 	/* Set window height */
 	// Default set map height = windows height
-	setMapHeight();
+	setLeftMenuHeight();
 
 	// Set map height = windows height 
-	function setMapHeight() {
-		var window_height = $(window).height();
-		$('#body').css({'height': (window_height+100)+'px', 'padding-bottom': '-100px'});
+	function setLeftMenuHeight() {
+		var window_height = $('#body .main_body').height();
+		$('#body .left_menu').css({'height': (window_height+100)+'px'});
 	}
 
 	// Window resize
 	$(window).resize(function() {
-		setMapHeight();
+		setLeftMenuHeight();
 	});
 	/*---------------------*/
 	/* Submit form */
@@ -50,7 +50,7 @@ jQuery(document).ready(function($) {
 				$('#notification').find('p').css('color', 'red').html('Cannot create new object!');
 			}
 			console.log(response);
-			setTimeout(location.reload(), 1500);
+			setTimeout(location.reload(), 2000);
 		})
 		.fail(function() {
 			console.log("error");
@@ -88,11 +88,19 @@ jQuery(document).ready(function($) {
 			});
 		}
 	});
+	$('form.list-object .tbody').find('input[type="checkbox"]').each(function() {
+		$(this).change(function(event) {
+			if($('form.list-object .tbody').find('input[type="checkbox"]').length == $('form.list-object .tbody').find('input[type="checkbox"]:checked').length)
+				$('input#select-all').prop('checked', true);
+			else
+				$('input#select-all').prop('checked', false);
+		});
+	});
+	
 	/* Form action list objects */
 	$('#object').find('form.list-object').submit(function(event) {
 		event.preventDefault();
 		var data = $(this).serializeArray();
-		console.log(data.length);
 		var request = {};
 		if(data[0].name == 'action' && data[0].value != '') {
 			$('#notification').find('span').each(function() { $(this).css('display', 'none'); });
@@ -103,37 +111,38 @@ jQuery(document).ready(function($) {
 					data: data,
 					action: 'submit_' + data[0].value +'_object'
 				}
+			if(data[0].value == 'delete')
+				$.ajax({
+					url: 'functions.php',
+					type: 'POST',
+					data: request
+				})
+				.done(function(response) {
+					console.log(response);
+					$('#notification').find('span').each(function() { $(this).css('display', 'none'); });
+					$('#notification').find('p').html('');
+					if(response == 'success') {
+						$('#notification').find('span.info').css('display', 'block');
+						$('#notification').find('p').css('color', 'green').html('Delete successfully');
+					}
+					else {
+						$('#notification').find('span.error').css('display', 'block');
+						$('#notification').find('p').css('color', 'red').html('Cannot delete objects!');
+					}
+				})
+				.fail(function() {
+					$('#notification').find('span.error').css('display', 'block');
+					$('#notification').find('p').css('color', 'red').html('Cannot delete objects!');
+				})
+				.always(function() {
+					setTimeout(location.reload(), 2000);
+				});
 		}
 		else {
 			$('#notification').find('span.error').css('display', 'block');
 			$('#notification').find('p').css('color', 'red').html('You must select actions!');
 			return false;
 		}
-
-		$.ajax({
-			url: 'functions.php',
-			type: 'POST',
-			data: request
-		})
-		.done(function(response) {
-			console.log(response);
-			$('#notification').find('span').each(function() { $(this).css('display', 'none'); });
-			$('#notification').find('p').css('color', 'green').html('');
-			if(response == 'success') {
-				$('#notification').find('span.info').css('display', 'block');
-				$('#notification').find('p').css('color', 'green').html('Delete successfully');
-			}
-			else {
-				$('#notification').find('span.error').css('display', 'block');
-				$('#notification').find('p').css('color', 'red').html('Cannot delete objects!');
-			}
-			setTimeout(location.reload(), 1500);
-		})
-		.fail(function() {
-			console.log("error");
-		})
-		.always(function() {
-			console.log("complete");
-		});
 	});
+
 });
