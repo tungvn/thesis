@@ -1,5 +1,6 @@
 <?php session_start(); 
-include_once('functions.php');?>
+include_once('functions.php');
+include_once('includes/settings.php');?>
 
 <!DOCTYPE html>
 <html>
@@ -9,7 +10,8 @@ include_once('functions.php');?>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>Thesis 2014 | <?php echo ucfirst($_GET['obj']); ?> - <?php echo $_GET[$_GET['obj']]; ?> | Administrator | Fimo Center</title>
 	<link rel="stylesheet" href="css/style.css">
-	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<!--<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>-->
+	<script src="../js/jquery-1.9.1.js"></script>
 	<script src="js/main.js"></script>
 </head>
 <body>
@@ -40,6 +42,7 @@ include_once('functions.php');?>
 						<li><a href="edit.php?obj=workspace">Workspaces</a></li>
 						<li><a href="edit.php?obj=layer">Layers</a></li>
 						<li><a href="edit.php?obj=users">Users</a></li>
+						<li><a href="settings.php">Settings</a></li>
 					</ul>
 					<a href="javascript:void(0);"></a>
 					<p class="footer">&copy; Copyright by TungVN 2014</p>

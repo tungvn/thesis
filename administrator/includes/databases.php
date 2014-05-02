@@ -1,16 +1,37 @@
 <?php 
 /*
-All scripts of databases.
+All functions action with databases.
+Version 1.0.0
 */
+// Include config.php
+include_once('../config.php');
+
 // Connect to server
+/* 
+@para
+	host: hostname
+	user: user to login server
+	pass: pass to login server
+@return 
+	- A [connection] if successful connect
+	- [FALSE] if fail connect
+*/
 function connectServer($host, $user, $pass) {
 	$query = 'host=' . $host . ' user=' . $user . ' password=' . $pass;
 	$link = pg_connect($query, PGSQL_CONNECT_FORCE_NEW);
 	return $link;
 }
 // Databases
+
+/* 
+@para
+	name: name database to create
+@return 
+	- [TRUE] if successful create
+	- [FALSE] if fail create
+*/
 function createDB($name) {
-	$link = connectServer('localhost', 'postgres', '123456');
+	$link = connectServer(HOST, DBUSER, DBPASS);
 	if(!$link) return false;
 
 	$query = 'CREATE DATABASE ' . $name;
@@ -22,8 +43,16 @@ function createDB($name) {
 	return false;
 }
 
+/* 
+@para
+	old_name: 
+	new_name:
+@return 
+	- [TRUE] if successful rename
+	- [FALSE] if fail rename
+*/
 function renameDB($old_name, $new_name) {
-	$link = connectServer('localhost', 'postgres', '123456');
+	$link = connectServer(HOST, DBUSER, DBPASS);
 	if(!$link) return false;
 
 	$query = 'ALTER DATABASE ' . $old_name . ' RENAME ' . $new_name;
@@ -38,7 +67,7 @@ function renameDB($old_name, $new_name) {
 function dropDB($name) {
 	if(@pg_dbname())
 		closeDB(pg_dbname());
-	$link = connectServer('localhost', 'postgres', '123456');
+	$link = connectServer(HOST, DBUSER, DBPASS);
 	if(!$link) return false;
 
 	$query = 'DROP DATABASE IF EXISTS ' . $name;
@@ -51,7 +80,7 @@ function dropDB($name) {
 }
 
 function commentDB($name, $desc) {
-	$link = connectServer('localhost', 'postgres', '123456');
+	$link = connectServer(HOST, DBUSER, DBPASS);
 	if(!$link) return false;
 
 	$query = "COMMENT ON DATABASE $name IS '$desc'";
@@ -87,7 +116,7 @@ function updateTable() {
 }
 
 function dropTable($namedb, $nametb) {
-	$link = connectDB('localhost', $namedb, 'postgres', '123456');
+	$link = connectDB(HOST, $namedb, DBUSER, DBPASS);
 	if(!$link) return false;
 
 	$query = 'DROP TABLE IF EXISTS ' . $nametb;
@@ -101,7 +130,7 @@ function dropTable($namedb, $nametb) {
 
 // Records
 function insertRecords($namedb, $nametb, $args = array()) {
-	$link = connectDB('localhost', $namedb, 'postgres', '123456');
+	$link = connectDB(HOST, $namedb, DBUSER, DBPASS);
 	if(!$link) return false;
 
 	$cols = '(';
@@ -129,7 +158,7 @@ function insertRecords($namedb, $nametb, $args = array()) {
 }
 
 function getRecords($namedb, $nametb, $selects = array('*'), $wheres = array(), $limit = 99999, $offset = 0) {
-	$link = connectDB('localhost', $namedb, 'postgres', '123456');
+	$link = connectDB(HOST, $namedb, DBUSER, DBPASS);
 	if(!$link) return false;
 
 	$sel = '';
@@ -169,7 +198,7 @@ function getRecords($namedb, $nametb, $selects = array('*'), $wheres = array(), 
 }
 
 function dropRecords($namedb, $nametb, $wheres) {
-	$link = connectDB('localhost', $namedb, 'postgres', '123456');
+	$link = connectDB(HOST, $namedb, DBUSER, DBPASS);
 	if(!$link) return false;
 
 	$whe = '';
@@ -188,6 +217,39 @@ function dropRecords($namedb, $nametb, $wheres) {
 	}
 
 	$query = "DELETE FROM $nametb WHERE $whe";
+	$result = pg_query($link, $query);
+
+	closeDB($link);
+
+	if($result) return true;
+	return false;
+}
+
+function updateRecords($namedb, $nametb, $sets, $wheres) {
+	$link = connectDB(HOST, $namedb, DBUSER, DBPASS);
+	if(!$link) return false;
+
+	$st = '';
+	foreach ($sets as $key => $set) {
+		$st .= "$key = '$set' ";
+	}
+
+	$whe = '';
+	$i = 0;
+	foreach ($wheres as $key => $val) {
+		if($i != 0) {
+			$whe .= ' AND ';
+		}
+		$i++;
+		$cm = '=';
+		if($val === true)
+			$cm = 'IS';
+		elseif ($val === false)
+			$cm = 'IS NOT';	
+		$whe .= "$key $cm '$val'";
+	}
+
+	$query = "UPDATE $nametb SET $st WHERE $whe";
 	$result = pg_query($link, $query);
 
 	closeDB($link);

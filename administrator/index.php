@@ -1,5 +1,6 @@
 <?php session_start(); 
-include_once('functions.php');?>
+include_once('functions.php');
+include_once('includes/settings.php');?>
 
 <!DOCTYPE html>
 <html>
@@ -9,7 +10,8 @@ include_once('functions.php');?>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>Thesis 2014 | Dashboard | Administrator | Fimo Center</title>
 	<link rel="stylesheet" href="css/style.css">
-	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<!--<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>-->
+	<script src="../js/jquery-1.9.1.js"></script>
 	<script src="js/main.js"></script>
 </head>
 <body>
@@ -40,6 +42,7 @@ include_once('functions.php');?>
 						<li><a href="edit.php?obj=workspace">Workspaces</a></li>
 						<li><a href="edit.php?obj=layer">Layers</a></li>
 						<li><a href="edit.php?obj=users">Users</a></li>
+						<li><a href="settings.php">Settings</a></li>
 					</ul>
 					<a href="javascript:void(0);"></a>
 					<p class="footer">&copy; Copyright by TungVN 2014</p>
@@ -86,9 +89,9 @@ include_once('functions.php');?>
 						<div class="container has-border has-border-radius">
 							<h3 class="div-title">User</h3>
 							<div class="the-content fl">
-								<p>We have <a href="edit.php?obj=user"><?php echo getNumberUser(); ?></a> user(s). 
+								<p>We have <a href="edit.php?obj=users"><?php echo getNumberUser(); ?></a> user(s). 
 									<?php if(is_admin()): ?>
-									<a class="button has-border-radius" href="edit.php?obj=user">Add New User</a>
+									<a class="button has-border-radius" href="edit.php?obj=users">Add New User</a>
 									<?php endif; ?>
 								</p>
 							</div>

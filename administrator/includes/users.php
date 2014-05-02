@@ -3,6 +3,8 @@
 All scripts of users.
 */
 include_once('databases.php');
+// Include config.php
+include_once('../config.php');
 
 // function to escape data and strip tags
 function safestrip($string){
@@ -28,8 +30,6 @@ function messages() {
 // log user in function
 function login($username, $password, $redirect_to) {
 
-	$link = connectDB('localhost', 'fimo', 'postgres', '123456');
-
 	//call safestrip function
 	$user = safestrip($username);
 	$pass = safestrip($password);
@@ -40,8 +40,12 @@ function login($username, $password, $redirect_to) {
 	// redirect link
 	$redirect = urldecode($redirect_to);
 
-	// check if the user id and password combination exist in database
-	$rows = pg_query($link, "SELECT * FROM users WHERE username = '$user' AND password = '$pass'") or die(pg_result_error());
+	$selects = array('*');
+	$wheres = array(
+		'username' => $user,
+		'password' => $pass
+	);
+	$rows = getRecords(DBNAME, 'users', $selects, $wheres);
 
 	//if match is equal to 1 there is a match
 	if (pg_num_rows($rows) == 1) {
@@ -66,11 +70,10 @@ function login($username, $password, $redirect_to) {
 	} 
 	else {
 		// login failed save error to a session
-		$_SESSION['login_error'] = 'Sorry, wrong username or password!';
+		$_SESSION['login_error'] = 'Sorry, wrong username or password!' . print_r($rows);
 		header('Location: ' . $redirect);
 		exit;
 	}
-	closeDB($link);
 }
 
 function logout() {
@@ -97,9 +100,12 @@ function register($username, $password, $email) {
 	$args = array(
 		'username' => $user,
 		'email' => $email,
-		'password' => $pass
+		'password' => $pass,
+		'role' => $role,
+		'date_created' => now(),
+		'verify' => false
 	);
-	$result = insertRecords('fimo', 'users', $args);
+	$result = insertRecords(DBNAME, 'users', $args);
 
 	return $result;
 }

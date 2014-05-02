@@ -18,15 +18,19 @@ body {
 }
 h1 {
 	font-size: 26px;
+	line-height: 35px;
 }
 h2 {
 	font-size: 20px;
+	line-height: 30px;
 }
 h3 {
 	font-size: 16px;
+	line-height: 25px;
 }
 p {
 	font-size: 13px;
+	line-height: 18px;
 }
 a, a:visited {
 	color: #1155ff;
@@ -83,9 +87,6 @@ ol, ul , li {
 .grid-4 {
 	width: 100%;
 }
-#notification {
-	margin: 10px 0 0;
-}
 #notification p {
 	color: #ff1111;
 	font-size: 14px;
@@ -115,7 +116,7 @@ ol, ul , li {
 	padding: 10px;
 }
 .div-title {
-	padding: 10px 0;
+	padding: 0 10px;
 }
 .the-content {
 	width: 100%;
@@ -165,7 +166,7 @@ span.required:after {
 #login_wrapper .login_box .login_box_container {
 	width: 100%;
 	padding: 20px;
-	margin-top: 50%;
+	margin-top: 8%;
 	border-radius: 5px;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
@@ -297,6 +298,8 @@ span.required:after {
 	font-size: 15px;
 	padding-left: 0;
 	margin: 10px 0 5px;
+	cursor: pointer;
+	cursor: hand;
 }
 #object form.grid-4 input,
 #object form.grid-4 textarea {
@@ -307,11 +310,14 @@ span.required:after {
 	padding: 5px;
 	margin: 5px 0 10px;
 }
+#object form.grid-4 select option {
+	padding: 0 10px;
+}
 #object form.grid-4 input[type="submit"] {
 	padding: 10px 20px;
 }
 #object form.list-object {
-	margin-top: 20px;
+	margin-top: 10px;
 }
 #object .list-object .table .thead,
 #object .list-object .table .tbody,

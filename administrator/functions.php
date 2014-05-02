@@ -9,6 +9,10 @@ Order Role from Highest to Lowest
 	4. publisher -- only publish available infomations, expect users verify
 	5. subscriber -- only view infomations, can NOT action with anything
 */
+// Include databases.php -- all functions to action with postgresql database
+include_once('includes/databases.php');
+
+
 function is_admin() {
 	@session_start();
 	if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == true) 
@@ -74,11 +78,9 @@ function curPageURL() {
 
 /* Index administrator */
 function getNumberObject($obj_type) {
-	include_once('includes/databases.php');
-
 	$selects = array('COUNT(*)');
 	$wheres = array('type' => $obj_type);
-	$rows = getRecords('fimo', 'object', $selects, $wheres);
+	$rows = getRecords(DBNAME, 'object', $selects, $wheres);
 
 	if (pg_num_rows($rows) == 1) {
 		$row = pg_fetch_array($rows);
@@ -89,7 +91,7 @@ function getNumberObject($obj_type) {
 
 function getNumberUser() {
 	$selects = array('COUNT(*)');
-	$rows = getRecords('fimo', 'users', $selects);
+	$rows = getRecords(DBNAME, 'users', $selects);
 	if($rows === false) return false;
 
 	if (pg_num_rows($rows) == 1) {
@@ -107,13 +109,12 @@ function addNewForm($obj_type) { ?>
 		<form class="grid-4 add-new-object" method="POST">
 			<label class="grid-4" for="name">Name<span class="required"></span></label>
 			<input class="grid-4 has-border has-border-radius" type="text" name="name" id="name" required>
-			<label class="grid-4" for="slug">Slug</label>
-			<input class="grid-4 has-border has-border-radius" type="text" name="slug" id="slug">
+			<input class="grid-4 has-border has-border-radius" type="hidden" name="slug" id="slug">
 			<input type="hidden" name="type" id="type" value="<?php echo $obj_type; ?>">
 			<?php if($obj_type == 'layer'): ?>
 			<label class="grid-4" for="workspace">Workspace<span class="required"></span></label>
-			<select name="workspace" id="workspace" class="grid-4 has-border has-border-radius" required>
-				<option value=""></option><?php $rows = getObjects('workspace'); 
+			<select name="workspace" id="workspace" class="grid-4 has-border has-border-radius" required />
+				<?php $rows = getObjects('workspace'); 
 				if($rows):
 					$i = 0;
 					while ($row = pg_fetch_array($rows)): ?>
@@ -121,13 +122,13 @@ function addNewForm($obj_type) { ?>
 				<?php endwhile; endif; ?>
 			</select>
 			<label class="grid-4" for="shpfile">Shapefile (.shp)<span class="required"></span></label>
-			<input class="grid-4 has-border has-border-radius" type="file" name="shpfile" id="shpfile" required accept=".shp">
+			<input class="grid-4 has-border has-border-radius" type="file" name="shpfile" id="shpfile" accept=".shp" required>
+			<?php endif; ?>
 			<label for="publish" class="grid-4">Publish</label>
 			<select name="publish" id="publish" class="grid-4 has-border has-border-radius">
-				<option value="publish">Publish</option>
-				<option value="unpublish">Unpublish</option>
+				<option value="1">Publish</option>
+				<option value="0" selected>Unpublish</option>
 			</select>
-			<?php endif; ?>
 			<label class="grid-4" for="description">Description</label>
 			<textarea class="grid-4 has-border has-border-radius" name="description" id="description" rows="10" style="resize: none;"></textarea>
 			<input class="button has-border-radius" type="submit" value="Create">
@@ -142,7 +143,7 @@ function listObject($obj_type) { ?>
 			<div class="grid-4">
 				<?php if(is_admin() || is_moder()): ?>
 				<select name="action" id="action" class="grid-1-4 has-border has-border-radius">
-					<option value=""></option>
+					<option value="">Choose action</option>
 					<option value="delete">Delete</option>
 				</select>
 				<input type="hidden" name="object_type" value="<?php echo $obj_type; ?>">
@@ -154,8 +155,8 @@ function listObject($obj_type) { ?>
 					<div class="grid-1-16"><input type="checkbox" name="select-all" id="select-all"></div>
 					<div class="grid-3-16"><p>ID</p></div>
 					<div class="grid-1-4"><p>Name</p></div>
-					<div class="grid-1-4"><p>Slug</p></div>
 					<div class="grid-1-4"><p>Description</p></div>
+					<div class="grid-1-4"><p><?php echo ($obj_type == 'layer') ? 'Workspace' : 'Layers'; ?></p></div>
 				</div>
 				<div class="grid-4 tbody">
 				<?php $paged = isset($_GET['paged']) ? $_GET['paged'] : 1;
@@ -165,10 +166,31 @@ function listObject($obj_type) { ?>
 					while ($row = pg_fetch_array($rows)) { ?>
 						<div class="grid-4 row">
 							<div class="grid-1-16"><input type="checkbox" name="<?php echo $obj_type . '-' . $row['id']; ?>" id="select[<?php echo $i++; ?>]"></div>
-							<div class="grid-3-16"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['slug']; ?>"><?php echo $row['id'] ?></a></div>
-							<div class="grid-1-4"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['slug']; ?>"><?php echo $row['name'] ?></a></div>
-							<div class="grid-1-4"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['slug']; ?>"><?php echo $row['slug'] ?></a></div>
-							<div class="grid-1-4"><?php echo @$row['desc'] ?></div>
+							<div class="grid-3-16"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['id']; ?>"><?php echo $row['id'] ?></a></div>
+							<div class="grid-1-4"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['id']; ?>"><?php echo $row['name'] ?></a></div>
+							<div class="grid-1-4"><?php echo ($row['description'] != '') ? $row['description'] : '&nbsp;'; ?></div>
+							<div class="grid-1-4">
+							<?php if($obj_type == 'layer'): ?>
+								<a href="single.php?obj=workspace&amp;workspace=<?php echo $row['workspace']; ?>">
+									<?php echo $row['workspace']; ?>
+								</a>
+							<?php elseif($obj_type == 'workspace'):
+								$selects = array('id');
+								$wheres = array(
+									'type' => 'layer',
+									'workspace' => $row['id']
+								); 
+								$rows_inner = getRecords(DBNAME, 'object', $selects, $wheres); 
+								if(pg_num_rows($rows_inner) > 0):
+									$j = 0;
+									while($row_inner = pg_fetch_array($rows_inner)): 
+										echo ($j == 0) ? '' : ', '; ?>
+									<a href="single.php?obj=layer&amp;layer=<?php echo $row_inner['id']; ?>">
+										<?php echo $row_inner['id']; ?>
+									</a>
+									<?php $j++; endwhile; endif; ?>
+							<?php endif; ?>
+							</div>
 						</div> 
 					<?php }
 				}
@@ -180,7 +202,7 @@ function listObject($obj_type) { ?>
 				</div>
 				<?php $selects = array('COUNT(*)'); 
 				$wheres = array('type' => $obj_type, 'publish' => 1);
-				$rows = getRecords('fimo', 'object', $selects, $wheres);
+				$rows = getRecords(DBNAME, 'object', $selects, $wheres);
 				if($rows === false) return false;
 
 				if (pg_num_rows($rows) == 1)
@@ -203,8 +225,84 @@ function listObject($obj_type) { ?>
 	</div>
 	<?php
 }
+
+function listUsers($obj_type) { ?>
+	<div class="container">
+		<h3 class="div-title">Lists of <?php echo $obj_type; ?></h3>
+		<form class="grid-4 list-object list-users" method="POST">
+			<div class="grid-4">
+				<?php if(is_admin() || is_moder()): ?>
+				<select name="action" id="action" class="grid-1-4 has-border has-border-radius">
+					<option value="">Choose action</option>
+					<option value="delete">Delete</option>
+				</select>
+				<?php $selects = array('DISTINCT role');
+				$verify = (isset($_GET['verify'])) ? $_GET['verify'] : 1;
+				$wheres = array('verify' => $verify);
+				$rows = getRecords(DBNAME, 'users', $selects, $wheres); ?>
+				<select name="change_role" id="change_role" class="grid-1-4 has-border has-border-radius" style="margin-left: 10px;">
+					<option value="">Change role to...</option><?php if($rows && pg_num_rows($rows) > 0): while($row = pg_fetch_array($rows)): ?>
+					<option value="<?php echo $row['role']; ?>"><?php echo ucfirst($row['role']); ?></option>
+					<?php endwhile; endif; ?>
+				</select>
+				<input type="submit" value="Apply" class="button fl has-border-radius" style="padding: 7px 10px 6px; margin-left: 10px;">
+				<?php endif; ?>
+			</div>
+			<div class="grid-4 table">
+				<div class="grid-4 thead has-border">
+					<div class="grid-1-16"><input type="checkbox" name="select-all" id="select-all"></div>
+					<div class="grid-3-16"><p>ID</p></div>
+					<div class="grid-1-4"><p>Name</p></div>
+					<div class="grid-1-4"><p>Email</p></div>
+					<div class="grid-1-4"><p>Role</p></div>
+				</div>
+				<div class="grid-4 tbody">
+				<?php $paged = isset($_GET['paged']) ? $_GET['paged'] : 1;
+				$selects = array('*'); 
+				$wheres = array('verify' => 1);
+				$rows = getRecords(DBNAME, 'users', $selects, $wheres, 10, ($paged-1)*10); 
+				if($rows) {
+					$i = 0;
+					while ($row = pg_fetch_array($rows)) { ?>
+					<div class="grid-4 row">
+						<div class="grid-1-16"><input type="checkbox" name="<?php echo 'user-' . $row['id']; ?>" id="select-user[<?php echo $row['id']; ?>]"></div>
+						<div class="grid-3-16"><p><?php echo $row['id']; ?></p></div>
+						<div class="grid-1-4"><p><?php echo $row['username']; ?></p></div>
+						<div class="grid-1-4"><p><?php echo $row['email']; ?></p></div>
+						<div class="grid-1-4"><p><?php echo $row['role']; ?></p></div>
+					</div>
+					<?php } ?>
+				<?php } ?>
+				</div>
+				<?php $selects = array('*'); 
+				$wheres = array('verify' => 1);
+				$rows = getRecords(DBNAME, 'users', $selects, $wheres);
+				if($rows === false) return false;
+
+				if (pg_num_rows($rows) == 1)
+					$row = pg_fetch_array($rows);
+				$sum = $row[0];
+				$number_page = (int) ($sum / 10);
+
+				if($number_page > 0): ?>
+				<div id="pagination" class="grid-4 tfoot has-border">
+					<ul class="fr">
+						<?php for($i=1;$i <= $number_page+1;$i++):
+						$current = ($i == $paged) ? 'current-item' : '';  ?>
+						<li class="fl <?php echo $current; ?>"><a href="edit.php?obj=<?php echo $obj_type; ?>&amp;paged=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+						<?php endfor; ?>
+					</ul>
+				</div>
+				<?php endif; ?>
+			</div>
+		</form>
+	</div>
+<?php
+}
+
 function edit($obj_type) { ?>
-	<div id="object">
+	<?php if($obj_type != 'users'): ?>
+	<div id="object" class="fl" for="object">
 		<?php if(is_admin() || is_moder()): ?>
 		<div class="grid-1">
 			<?php addNewForm($obj_type); ?>
@@ -218,19 +316,25 @@ function edit($obj_type) { ?>
 		</div>
 		<?php endif; ?>
 	</div>
-<?php
+	<?php else: ?>
+	<div id="object" class="fl" for="users">
+	<?php if(is_admin()): ?>
+		<div class="grid-4">
+		<?php listUsers($obj_type); ?>
+		</div>
+	<?php endif; ?>
+	</div>
+	<?php endif;
 }
 
 
 function getObjects($obj_type, $limit = 99999, $offset = 0) {
-	include_once('includes/databases.php');
-
 	$selects = array( 'id', 'name', 'slug', 'workspace', 'description' );
 	$wheres = array(
 		'type' => $obj_type,
 		'publish' => 1
 	);
-	$rows = getRecords('fimo', 'object', $selects, $wheres, $limit, $offset);
+	$rows = getRecords(DBNAME, 'object', $selects, $wheres, $limit, $offset);
 	if($rows === false) return false;
 
 	if (pg_num_rows($rows) >= 1)
@@ -257,6 +361,8 @@ if(isset($_POST['action']) && !empty($_POST['action'])) {
 	switch($action) {
 		case 'submit_add_new_object' : addNewObject($_POST['data']); break;
 		case 'submit_delete_object' : deleteObject($_POST['data']); break;
+		case 'delete_users' : deleteUsers($_POST['data']); break;
+		case 'change_role_users' : changeRole($_POST['data']); break;
 	}
 }
 /* For Ajax call */
@@ -266,36 +372,57 @@ function addNewObject($datas) {
 	$type;
 	$desc;
 	$workspace;
-	foreach ($datas as $data) {
-		if($data['name'] == 'name') $name = $data['value'];
-		if($data['name'] == 'slug') $slug = $data['value'];
-		if($data['name'] == 'type') $type = $data['value'];
-		if($data['name'] == 'description') $desc = $data['value'];
-		$workspace =(isset($data['workspace'])) ? $data['workspace'] : 0;
-	}
-
-	include_once('includes/databases.php');
-
-	$result = createDB($slug);
-	if($result) {
-		$result_1 = commentDB($slug, $desc);
-		if($result_1) {
-			$args = array(
-				'name' => $name,
-				'slug' => $slug,
-				'type' => $type,
-				'workspace' => $workspace,
-				'description' => $desc
-			);
-			$result_2 = insertRecords('fimo', 'object', $args);
-			if($result_2) {
-				echo 'success';
-			}
-			else echo 'fail_insert_tb';
+	$publish;
+	$shpfile;
+	for($i=0; $i < sizeof($datas);$i++) {
+		if($datas[$i]['name'] == 'name') $name = $datas[$i]['value'];
+		if($datas[$i]['name'] == 'slug') $slug = $datas[$i]['value'];
+		if($datas[$i]['name'] == 'type') $type = $datas[$i]['value'];
+		if($datas[$i]['name'] == 'description') $desc = $datas[$i]['value'];
+		if($datas[$i]['name'] == 'publish') $publish = $datas[$i]['value'];
+		if(isset($type) && $type == 'layer') {
+			if($datas[$i]['name'] == 'workspace') $workspace = $datas[$i]['value'];
+			//if($datas[$i]['name'] == 'shpfile') $shpfile = $datas[$i]['value'];
 		}
-		else echo 'fail_comment';
 	}
-	else echo 'fail_create_db';
+
+	if($type == 'workspace') {
+		$result = createDB($slug);
+		if($result) {
+			$result_1 = commentDB($slug, $desc);
+			if($result_1) {
+				$args = array(
+					'name' => $name,
+					'slug' => $slug,
+					'type' => $type,
+					'description' => $desc,
+					'publish' => $publish
+				);
+				$result_2 = insertRecords(DBNAME, 'object', $args);
+				if($result_2) {
+					echo 'success';
+				}
+				else echo 'fail_insert_tb';
+			}
+			else echo 'fail_comment';
+		}
+		else echo 'fail_create_db';
+	}
+	elseif($type == 'layer') {
+		$args = array(
+			'name' => $name,
+			'slug' => $slug,
+			'type' => $type,
+			'workspace' => $workspace,
+			'description' => $desc,
+			'publish' => $publish
+		);
+		$result_2 = insertRecords(DBNAME, 'object', $args);
+		if($result_2) {
+			echo 'success';
+		}
+		else echo 'fail_insert_tb';
+	}
 }
 
 function deleteObject($datas) {
@@ -312,12 +439,10 @@ function deleteObject($datas) {
 			$obj_type = $datas[$i]['value'];
 	}
 
-	include_once('includes/databases.php');
-
 	foreach ($ids as $i => $id) {
 		$selects = array('slug');
 		$wheres = array('id' => $id);
-		$rows = getRecords('fimo', 'object', $selects, $wheres);
+		$rows = getRecords(DBNAME, 'object', $selects, $wheres);
 		if($rows === false) return false;
 
 		if (pg_num_rows($rows) > 0) {
@@ -326,10 +451,10 @@ function deleteObject($datas) {
 			}
 		}
 	}
-	
+
 	foreach ($slugs as $i => $slug) {
 		$wheres = array('id' => $ids[$i]);
-		$result_del_obj = dropRecords('fimo', 'object', $wheres);
+		$result_del_obj = dropRecords(DBNAME, 'object', $wheres);
 		if($result_del_obj) {
 			if($obj_type == 'workspace') {
 				$result_del_db = dropDB($slug);
@@ -351,5 +476,59 @@ function deleteObject($datas) {
 	echo $check;
 }
 
-/* String */
+function deleteUsers($datas) {
+	$ids = array();
+	$check = '';
+	
+	for ($i=0; $i < sizeof($datas); $i++) { 
+		if($datas[$i]['name'] != 'action' && $datas[$i]['name'] != 'change_role' && $datas[$i]['name'] != 'select-all' && $datas[$i]['name'] != 'object_type') {
+			array_push($ids, substr($datas[$i]['name'], strpos($datas[$i]['name'], '-')+1));
+		}
+	}
+
+	foreach ($ids as $i => $id) {
+		$wheres = array('id' => $id);
+		$result_del_users = dropRecords(DBNAME, 'users', $wheres);
+		if($result_del_users) {
+			$check = 'success_del_users';
+		}
+		else {
+			$check = 'fail_del_users';
+			break;
+		}
+	}
+	
+	echo $check;
+}
+
+function changeRole($datas) {
+	$ids = array();
+	$change_to = '';
+	$check = '';
+
+	for ($i=0; $i < sizeof($datas); $i++) { 
+		if($datas[$i]['name'] != 'action' && $datas[$i]['name'] != 'change_role' && $datas[$i]['name'] != 'select-all') {
+			array_push($ids, substr($datas[$i]['name'], strpos($datas[$i]['name'], '-')+1));
+		}
+		if($datas[$i]['name'] == 'change_role') {
+			$change_to = $datas[$i]['value'];
+		}
+	}
+
+	foreach ($ids as $i => $id) {
+		$sets = array('role' => $change_to);
+		$wheres = array('id' => $id);
+		$result_change_role = updateRecords(DBNAME, 'users', $sets, $wheres);
+		if($result_change_role) {
+			$check = 'success_change_role';
+		}
+		else {
+			$check = 'fail_change_role_users';
+			break;
+		}
+	}
+	
+	echo $check;
+}
+
 ?>
