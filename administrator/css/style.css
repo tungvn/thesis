@@ -39,6 +39,9 @@ a, a:visited {
 ol, ul , li {
 	list-style: none outside none;
 }
+input {
+	padding: 5px;
+}
 .clearfix:before, .clearfix:after {
     content: " ";
     display: table;

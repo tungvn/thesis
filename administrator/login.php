@@ -67,6 +67,9 @@ if(isset($_GET['action']) && $_GET['action'] == 'logout')
 				<p><a id="redirect_login" href="javascript:void(0);">Back to Login</a></p>
 			</div>
 		</div>
+		<div class="fullpage hidden">
+			div.
+		</div>
 	</div>
 </body>
 </html>

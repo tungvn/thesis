@@ -230,8 +230,13 @@ function updateRecords($namedb, $nametb, $sets, $wheres) {
 	if(!$link) return false;
 
 	$st = '';
+	$i = 0;
 	foreach ($sets as $key => $set) {
+		if($i != 0) 
+			$st .= ', ';
+		$i++;
 		$st .= "$key = '$set' ";
+
 	}
 
 	$whe = '';

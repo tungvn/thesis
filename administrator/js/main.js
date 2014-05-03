@@ -257,4 +257,17 @@ jQuery(document).ready(function($) {
 		if($(this).find('input#rg_p').val() != $(this).find('input#rg_rep').val())
 			$(this).find('p.register_error').html('Password and re-password must be same!');
 	});
+
+	// Add new option -- Settings.php
+	//if($('body').find('#setting').) {
+		
+		$('#setting').find('input#add_new_option').click(function(event) {
+			event.preventDefault();
+			var table = $('#setting').find('table');
+			var html = '<tr><td class="grid-1"><input type="text" class="has-border has-border-radius" name="add_new_option_name" required placeholder="Enter option name (only a-z, 0-9, _)" style="width: 100%;"></td><td class="grid-1"><input type="text" class="has-border has-border-radius" name="add_new_option_value" placeholder="Enter your value"></td><td class="grid-1"><input type="text" name="add_new_option_desc" class="has-border has-border-radius" placeholder="Enter option description" style="width: 100%"></td></tr>';
+			table.append(html);
+			$(this).hide();
+		});
+	//}
+	
 });

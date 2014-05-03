@@ -91,7 +91,7 @@ include_once('includes/settings.php');?>
 							<div class="the-content fl">
 								<p>We have <a href="edit.php?obj=users"><?php echo getNumberUser(); ?></a> user(s). 
 									<?php if(is_admin()): ?>
-									<a class="button has-border-radius" href="edit.php?obj=users">Add New User</a>
+									<a class="button has-border-radius" href="edit.php?obj=users">View User</a>
 									<?php endif; ?>
 								</p>
 							</div>

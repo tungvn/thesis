@@ -7,18 +7,19 @@ All functions actions with Page Settings
 // Include databases.php -- all functions to action with postgresql database
 include_once('includes/databases.php');
 
-function registerOption($name, $desc) {
+function registerOption($name, $value = '', $desc = '') {
 	$args = array(
 		'name' => $name,
-		'value' => $value
+		'value' => $value,
+		'description' => $desc
 	);
 
 	$result = insertRecords(DBNAME, 'settings', $args);
 	return $result;
 }
 
-function updateOption($name, $value) {
-	$sets = array('value' => $value);
+function updateOption($name, $value, $desc) {
+	$sets = array('value' => $value, 'description' => $desc);
 	$wheres = array('name' => $name);
 
 	$result = updateRecords(DBNAME, 'settings', $sets, $wheres);
