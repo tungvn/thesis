@@ -8,7 +8,7 @@ OpenLayers.DOTS_PER_INCH = 25.4 / 0.28;
 
 OpenLayers.ProxyHost = "/dadangsinhhoc/proxy.cgi?url=";
 
-function init() {
+function init(name, slug) {
     format = 'image/png';
     var mainUrl = GEOSERVERBASE + '/geoserver/wms' ;
 
@@ -22,9 +22,9 @@ function init() {
     map = new OpenLayers.Map('map', options);
 
     // setup tiled layer
-    water = new OpenLayers.Layer.WMS("VietNam Layer",
+    water = new OpenLayers.Layer.WMS(name,
         mainUrl, 
-        {'layers': VietnamLayer, transparent: true, format: 'image/gif'},
+        {'layers': slug, transparent: true, format: 'image/gif'},
         {isBaseLayer: true}
     );
     

@@ -10,7 +10,7 @@ Order Role from Highest to Lowest
 	5. subscriber -- only view infomations, can NOT action with anything
 */
 // Include databases.php -- all functions to action with postgresql database
-include_once('includes/databases.php');
+include_once $_SERVER['DOCUMENT_ROOT'].'/github/thesis/administrator/includes/databases.php';
 
 
 function is_admin() {
@@ -170,12 +170,18 @@ function listObject($obj_type) { ?>
 							<div class="grid-1-4"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['id']; ?>"><?php echo $row['name'] ?></a></div>
 							<div class="grid-1-4"><?php echo ($row['description'] != '') ? $row['description'] : '&nbsp;'; ?></div>
 							<div class="grid-1-4">
-							<?php if($obj_type == 'layer'): ?>
+							<?php if($obj_type == 'layer'): 
+							$selects = array('slug');
+							$wheres = array('id' => $row['workspace']);
+							$rows_wp = getRecords(DBNAME, 'object', $selects, $wheres);
+							if($rows_wp && pg_num_rows($rows_wp) > 0) {
+								$row_wp = pg_fetch_array($rows_wp);
+							} ?>
 								<a href="single.php?obj=workspace&amp;workspace=<?php echo $row['workspace']; ?>">
-									<?php echo $row['workspace']; ?>
+									<?php echo $row_wp['slug']; ?>
 								</a>
 							<?php elseif($obj_type == 'workspace'):
-								$selects = array('id');
+								$selects = array('id', 'slug');
 								$wheres = array(
 									'type' => 'layer',
 									'workspace' => $row['id']
@@ -186,7 +192,7 @@ function listObject($obj_type) { ?>
 									while($row_inner = pg_fetch_array($rows_inner)): 
 										echo ($j == 0) ? '' : ', '; ?>
 									<a href="single.php?obj=layer&amp;layer=<?php echo $row_inner['id']; ?>">
-										<?php echo $row_inner['id']; ?>
+										<?php echo $row_inner['slug']; ?>
 									</a>
 									<?php $j++; endwhile; endif; ?>
 							<?php endif; ?>
@@ -382,14 +388,20 @@ function addNewObject($datas) {
 		if($datas[$i]['name'] == 'publish') $publish = $datas[$i]['value'];
 		if(isset($type) && $type == 'layer') {
 			if($datas[$i]['name'] == 'workspace') $workspace = $datas[$i]['value'];
-			//if($datas[$i]['name'] == 'shpfile') $shpfile = $datas[$i]['value'];
+			if($datas[$i]['name'] == 'shpfile') $shpfile = $datas[$i]['value'];
 		}
 	}
+
+	if(isset($_FILES)) { ?>
+	<script>
+	alert(1);
+	</script>
+	<?php }
 
 	if($type == 'workspace') {
 		$result = createDB($slug);
 		if($result) {
-			$result_1 = commentDB($slug, $desc);
+			$result_1 = createExtension($slug);
 			if($result_1) {
 				$args = array(
 					'name' => $name,
@@ -409,19 +421,34 @@ function addNewObject($datas) {
 		else echo 'fail_create_db';
 	}
 	elseif($type == 'layer') {
-		$args = array(
-			'name' => $name,
-			'slug' => $slug,
-			'type' => $type,
-			'workspace' => $workspace,
-			'description' => $desc,
-			'publish' => $publish
-		);
-		$result_2 = insertRecords(DBNAME, 'object', $args);
-		if($result_2) {
-			echo 'success';
+		$selects = array('slug');
+		$wheres = array('id' => 71);
+		$wp_slugs = getRecords(DBNAME, 'object', $selects, $wheres);
+		if($wp_slugs && pg_num_rows($wp_slugs) > 0)
+			$wp_slug = pg_fetch_array($wp_slugs);
+		$wp_slug = $wp_slug['slug'];
+
+		$shp2pgsql = '"C:/Program Files/PostgreSQL/9.3/bin/shp2pgsql" -s 32448 -W LATIN1 -c -D -I '; 
+		$psql = '"C:/Program Files/PostgreSQL/9.3/bin/psql" -d ' . $wp_slug . ' -U postgres ';
+		$result = exec($shp2pgsql.$shpfile." | ".$psql);
+		if($result == 'COMMIT') {
+			$args = array(
+				'name' => $name,
+				'slug' => $slug,
+				'type' => $type,
+				'workspace' => $workspace,
+				'description' => $desc,
+				'publish' => $publish
+			);
+			$result_2 = insertRecords(DBNAME, 'object', $args);
+			if($result_2) {
+				echo 'success';
+			}
+			else echo 'fail_insert_tb';
 		}
-		else echo 'fail_insert_tb';
+		else {
+			echo 'fail_insert_tb';
+		}
 	}
 }
 

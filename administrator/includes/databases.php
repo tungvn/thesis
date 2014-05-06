@@ -4,7 +4,7 @@ All functions action with databases.
 Version 1.0.0
 */
 // Include config.php
-include_once('../config.php');
+include_once $_SERVER['DOCUMENT_ROOT'].'/github/thesis/administrator/config.php';
 
 // Connect to server
 /* 
@@ -56,6 +56,19 @@ function renameDB($old_name, $new_name) {
 	if(!$link) return false;
 
 	$query = 'ALTER DATABASE ' . $old_name . ' RENAME ' . $new_name;
+	$result = pg_query($link, $query);
+
+	closeDB($link);
+
+	if($result) return true;
+	return false;
+}
+
+function createExtension($dbname) {
+	$link = connectDB(HOST, $dbname, DBUSER, DBPASS);
+	if(!$link) return false;
+
+	$query = 'CREATE EXTENSION postgis SCHEMA public VERSION "2.1.1"';
 	$result = pg_query($link, $query);
 
 	closeDB($link);

@@ -16,6 +16,10 @@ jQuery(document).ready(function($) {
 	/*---------------------*/
 	/* Submit form */
 	if($('body').find('#object').attr('for') == 'object') {
+		/*var dir = '';
+		$('#object').find('input#shpfile').change(function(event) {
+			
+		});*/
 		$('#object').find('form.add-new-object').submit(function(event) {
 			event.preventDefault();
 			var name = $(this).find('input#name').val();

@@ -1,3 +1,4 @@
+<?php include_once('/functions.php'); ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,26 +40,18 @@
 						<div class="map_option_block">
 							<fieldset>
 								<legend>Layer selected</legend>
-								<p>
-									<input type="checkbox" name="ggmap_layer" id="map_layer_option[0]" value="roadmap">
-									<label for="map_layer_option[0]">GG Roadmap</label>
-								</p>
-								<p>
-									<input type="checkbox" name="ggmap_layer" id="map_layer_option[1]" value="satellite">
-									<label for="map_layer_option[1]">GG Satellite</label>
-								</p>
-								<p>
-									<input type="checkbox" name="ggmap_layer" id="map_layer_option[3]" value="hybrid">
-									<label for="map_layer_option[3]">GG Hybrid</label>
-								</p>
-								<p>
-									<input type="checkbox" name="ggmap_layer" id="map_layer_option[4]" value="terrain">
-									<label for="map_layer_option[4]">GG Terrain</label>
-								</p>
-								<p>
-									<input type="checkbox" name="map_layer_option_2" id="map_layer_option[5]" value="customlayer">
-									<label for="map_layer_option[5]">My Custom Layer</label>
-								</p>
+								<?php $selects = array('id', 'name', 'slug');
+								$wheres = array('type' => 'layer');
+								$rows = getRecords(DBNAME, 'object', $selects, $wheres);
+								if($rows && pg_num_rows($rows) > 0) {
+									$i = 0;
+									while ($row = pg_fetch_array($rows)) { ?>
+									<p>
+										<input type="checkbox" name="layer-<?php echo $row['id']; ?>" id="map_layer_option[<?php echo $i; ?>]" value="<?php echo $row['slug']; ?>">
+										<label for="map_layer_option[<?php echo $i++; ?>]"><?php echo $row['name']; ?></label>
+									</p>
+									<?php }
+								} ?>
 							</fieldset>
 						</div>
 						<div class="map_option_block">
