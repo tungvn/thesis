@@ -16,7 +16,7 @@
 			</div>
 			<!-- end .logo -->
 			<form class="search_box">
-				<input type="text" name="s" id="s" placeholder="Enter your keywords">
+				<input type="text" name="s" id="s" placeholder="Enter your keywords" autocomplete="off">
 				<input type="submit" value="Search">
 				<a href="#">Advance Search</a>
 			</form>
@@ -69,7 +69,7 @@
 						</div>
 						<div class="map_option_block">
 							<legend for="map_info">Search Result</legend>
-							<ul class="search-result">
+							<ul id="search-result" class="search-result">
 							</ul>
 						</div>
 					</div>
@@ -135,6 +135,38 @@
 					$('#responseText').animate({width: '100%'}, 400);
 				}
 			});
+
+			$('input#s').keyup(function(event) {
+				if(event.keyCode == 32) {
+					//setTimeout(500);
+					var data = $.trim($(this).val());
+					if ( data!='')
+					{	
+						data = convertU2T(data);
+						var request = {
+							keyword: data
+						}
+						$.ajax({
+							url: 'functions.php',
+							type: 'POST',
+							data: request,
+							
+						})
+						.done(function(response) {
+							console.log(response);
+							response = convertT2U(response);	
+												
+							$("ul#search-result").html(response);
+						})
+						.fail(function() {
+							console.log("error");
+						})
+						.always(function() {
+							console.log("complete");
+						});
+					}
+				}
+			});
 		});
 
 		</script>
@@ -191,33 +223,27 @@
 		<script src="js/vumods.js" type='text/javascript'></script>
 		<script src="js/vumaps.js" type='text/javascript'></script>
 		<script src="js/vumaps2.js" type='text/javascript'></script>
-		
-		<script>
-		jQuery(document).ready(function($) {
-			$('#s').on('keyup', function(event) {
-				if(event.keyCode == 32) {
-					var data = $.trim($(this).val());
-					var request = {
-						keyword: data
-					}
-					$.ajax({
-						type: 'POST',
-						data: request,
-						
-					})
-					.done(function(response) {
-						console.log(response);
-					})
-					.fail(function() {
-						console.log("error");
-					})
-					.always(function() {
-						console.log("complete");
-					});
-				}
-			});
-		});
-		</script>
+
+
+		<script type="text/javascript">
+	function convertU2T(xau)
+	{
+		var srcid1 = "UNICODE";
+		var srcmap1 = initCharMap(srcid1);
+		var destmap1 = initCharMap(parseMapID("TCVN-3"));
+		var xau1 = srcmap1.convertTxtTo( xau, destmap1 )	;
+		return xau1;
+	}
+	function convertT2U(xau)
+	{
+		var srcid1 = "TCVN-3";
+		var srcmap1 = initCharMap(srcid1);
+		var destmap1 = initCharMap(parseMapID("UNICODE"));
+		var xau1 = srcmap1.convertTxtTo( xau, destmap1 )	;
+		return xau1;
+	}
+
+</script>
 	</div>
 </body>
 </html>
