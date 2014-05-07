@@ -392,12 +392,6 @@ function addNewObject($datas) {
 		}
 	}
 
-	if(isset($_FILES)) { ?>
-	<script>
-	alert(1);
-	</script>
-	<?php }
-
 	if($type == 'workspace') {
 		$result = createDB($slug);
 		if($result) {
@@ -422,7 +416,7 @@ function addNewObject($datas) {
 	}
 	elseif($type == 'layer') {
 		$selects = array('slug');
-		$wheres = array('id' => 71);
+		$wheres = array('id' => $workspace);
 		$wp_slugs = getRecords(DBNAME, 'object', $selects, $wheres);
 		if($wp_slugs && pg_num_rows($wp_slugs) > 0)
 			$wp_slug = pg_fetch_array($wp_slugs);

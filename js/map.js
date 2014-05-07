@@ -3,7 +3,7 @@ jQuery(document).ready(function() {
 	// map type option
 	var type = new Array();
 	// default map is 'roadmap + customlayer'
-	setMapTypeId(type);
+	//setMapTypeId(type);
 	// update 'type' array
 	function updateTypeArray(obj) {
 		var type = new Array(); // empty 'type'
@@ -11,7 +11,6 @@ jQuery(document).ready(function() {
 		$(obj).parents('div.map_option_block').find('input:checked').each(function() {
 			type[type.length] = $(this).val();
 		});
-		console.log(type);
 		return type;
 	}
 	// change map when change select input
@@ -23,7 +22,10 @@ jQuery(document).ready(function() {
 		});
 		// update 'type'
 		type = updateTypeArray(this);
+		console.log(type);
+		
+		layerInput(type);
 		// set map type id follow input
-		setMapTypeId(type);
+		//setMapTypeId(type);
 	});
 });

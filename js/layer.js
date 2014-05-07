@@ -1,6 +1,7 @@
 var map;
 var untiled;
 var tiled;
+var mainUrl = GEOSERVERBASE + '/geoserver/wms' ;
 // pink tile avoidance
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
 // make OL compute scale according to WMS spec
@@ -8,9 +9,9 @@ OpenLayers.DOTS_PER_INCH = 25.4 / 0.28;
 
 OpenLayers.ProxyHost = "proxy.cgi?url=";
 
-function init(name, slug) {
+function init() {
     format = 'image/png';
-    var mainUrl = GEOSERVERBASE + '/geoserver/wms' ;
+    
     /*
     var bounds = new OpenLayers.Bounds(
         102.14499664306652, 8.563331604003906,
@@ -42,7 +43,7 @@ function init(name, slug) {
         maxExtent: bounds
     };
     map = new OpenLayers.Map('map', options);
-
+    /*
     textxa = new OpenLayers.Layer.WMS("Textxa Layer",
         mainUrl, 
         {'layers': BacKanTextxa, transparent: true, format: 'image/gif', projection : 'EPSG:32448'},
@@ -78,45 +79,38 @@ function init(name, slug) {
         {'layers': BacKanDutgay, transparent: true, format: 'image/gif', projection : 'EPSG:32448'},
         {isBaseLayer: false}
     );
-
+    */
     border = new OpenLayers.Layer.WMS("Boundary Layer",
         mainUrl, 
         {'layers': BacKanBoundary, transparent: true, format: 'image/gif', projection : 'EPSG:32448'},
         {isBaseLayer: true, opacity: 0.5}
     );
-
+    /* = 
     // setup tiled layer
-<<<<<<< HEAD
-    water = new OpenLayers.Layer.WMS(name,
-        mainUrl, 
-        {'layers': slug, transparent: true, format: 'image/gif'},
-        {isBaseLayer: true}
-=======
     contour = new OpenLayers.Layer.WMS("Contour100 Layer",
         mainUrl, 
         {'layers': BacKanContour100, transparent: true, format: 'image/gif',projection : 'EPSG:32448' },
         {isBaseLayer: false}
->>>>>>> 49965a15b497a0d01f283c6f5e3817c1788da6cd
     );
-    
-    highlightLayer = new OpenLayers.Layer.Vector("Highlighted Features", {
+    */
+    /*highlightLayer = new OpenLayers.Layer.Vector("Highlighted Features", {
         displayInLayerSwitcher: false, 
         isBaseLayer: false 
         }
-    );
-
+    );*/
+/*
     infoControls = {
         click: new OpenLayers.Control.WMSGetFeatureInfo({
             url: mainUrl, 
             title: 'Identify features by clicking',
-            layers: [border,lokhoan],
+            layers: [border],
             queryVisible: true,
             infoFormat: "text/html"           
         }),
         hover: new OpenLayers.Control.WMSGetFeatureInfo({
             url: mainUrl, 
             title: 'Identify features by clicking',
-            layers: [contour],
+            layers: [border],
             hover: true,
             // defining a custom format options here
             formatOptions: {
@@ -126,8 +120,42 @@ function init(name, slug) {
             queryVisible: true
         })
     };
-
-    map.addLayers([lokhoan,border, highlightLayer]); 
+    var array = [border];
+    map.addLayers(array); 
+*/
+    
+    // call function to show map and register event click + hover
+    temp = new OpenLayers.Layer.WMS("Boundary Layer",
+        mainUrl, 
+        {'layers': BacKanBoundary, transparent: true, format: 'image/gif', projection : 'EPSG:32448'},
+        {isBaseLayer: true, opacity: 0.5}
+    );
+    var layers = new Array(border);
+    var layers1 = layerInput(new Array('boundary'));
+    
+    infoControls = {
+        click: new OpenLayers.Control.WMSGetFeatureInfo({
+            url: mainUrl, 
+            title: 'Identify features by clicking',
+            layers: layers1,
+            queryVisible: true,
+            infoFormat: "text/html"           
+        }),
+        hover: new OpenLayers.Control.WMSGetFeatureInfo({
+            url: mainUrl, 
+            title: 'Identify features by clicking',
+            layers: layers1,
+            hover: true,
+            // defining a custom format options here
+            formatOptions: {
+                typeName: 'water_bodies', 
+                featureNS: 'http://www.openplans.org/topp'
+            },
+            queryVisible: true
+        })
+    };
+    
+    map.addLayers(layers1);
 
     for (var i in infoControls) { 
         infoControls[i].events.register("getfeatureinfo", this, showInfo);
@@ -215,3 +243,27 @@ function showInfo(evt) {
     }
 }
 
+function layerInput(layers) {
+    // set default is 'roadmap + customlayer' if 'type' is empty
+    if(layers.length == 0 || typeof(layers) === 'undefined') {
+        temp = new OpenLayers.Layer.WMS("Viet Nam",
+            mainUrl, 
+            {'layers': VietnamLayer1, transparent: true, format: 'image/gif', projection : 'EPSG:32448'},
+            {isBaseLayer: true, opacity: 0.5}
+        );
+        layers = [temp];
+    }
+    var arrayLayers = new Array();
+    console.log(layers);
+    
+    for (var i = 0; i < layers.length; i++) {
+        arrayLayers.push(
+            new OpenLayers.Layer.WMS(layers[i],
+                mainUrl, 
+                {'layers': layers[i], transparent: true, format: 'image/gif', projection : 'EPSG:32448'},
+                {isBaseLayer: true, opacity: 0.5}
+            )
+        );
+    }
+    return arrayLayers;
+}

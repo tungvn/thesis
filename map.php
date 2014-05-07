@@ -6,6 +6,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>UI Demo | Fimo Center | 2014</title>
 	<link rel="stylesheet" href="css/style_map.css">
+	<script type="text/javascript" src="js/OpenLayers.js"></script>
+	<script type="text/javascript" src="js/base.js"></script>
+	<script type="text/javascript" src="js/layer.js"></script>
 </head>
 <body onload="init()">
 	<div id="wrapper">
@@ -130,6 +133,7 @@
 			});
 
 			$('input#s').keyup(function(event) {
+				event.preventDefault();
 				if(event.keyCode == 32) {
 					//setTimeout(500);
 					var data = $.trim($(this).val());
@@ -163,17 +167,16 @@
 		});
 
 		</script>
+		<script type="text/javascript" src="js/map.js"></script>
+
 		<!--- 
 		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&language=en"></script> 
 		<script src="wms.js"></script>
-		<script src="map-functions.js"></script>
-		<script src="map.js"></script> -->
+		<script src="map-functions.js"></script>-->
 		
 		<!-- Openlayers -->
 		<!--<script type="text/javascript" src="http://localhost:8080/geoserver/openlayers/OpenLayers.js"></script>-->
-		<script type="text/javascript" src="js/OpenLayers.js"></script>
-		<script src="js/base.js"></script>
-		<script src="js/layer.js"></script>
+		
 
 		<!-- Google Charts
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
