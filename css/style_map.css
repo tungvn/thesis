@@ -29,6 +29,12 @@ p {
 	font-size: 12px;
 	line-height: 18px;
 }
+p.div-title {
+	color: #000000;
+	font-size: 14px;
+	text-transform: capitalize;
+	line-height: 20px;
+}
 #wrapper {
 	float: left;
 	width: 100%;

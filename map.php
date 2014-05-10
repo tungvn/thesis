@@ -10,7 +10,7 @@
 	<script type="text/javascript" src="js/base.js"></script>
 	<script type="text/javascript" src="js/layer.js"></script>
 </head>
-<body onload="init()">
+<body>
 	<div id="wrapper">
 		<div id="header">
 			<div class="logo">
@@ -55,17 +55,19 @@
 										$rows = getRecords(DBNAME, 'object', $selects, $wheres);
 
 										if($rows && pg_num_rows($rows) > 0) {
+											echo '<div class="workspace">';
 											if($num == 0) {
-												echo '<p>' . $wp['name'] . '</p>';
+												echo '<p class="div-title">' . $wp['name'] . '</p>';
 												$num++;
 											}
 											$i = 0;
 											while ($row = pg_fetch_array($rows)) { ?>
 											<p>
-												<input type="checkbox" name="layer-<?php echo $row['id']; ?>" id="map_layer_option[<?php echo $i; ?>]" value="<?php echo $wp['slug'] . ':' . $row['slug']; ?>">
-												<label for="map_layer_option[<?php echo $i++; ?>]"><?php echo $row['name']; ?></label>
+												<input type="checkbox" name="layer-<?php echo $row['id']; ?>" id="map_layer_option[<?php echo $wp['id']; ?>][<?php echo $i; ?>]" value="<?php echo $wp['slug'] . ':' . $row['slug']; ?>">
+												<label for="map_layer_option[<?php echo $wp['id']; ?>][<?php echo $i++; ?>]"><?php echo $row['name']; ?></label>
 											</p>
 											<?php }
+											echo '</div>';
 										}
 									}
 								} ?>

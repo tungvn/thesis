@@ -3,7 +3,7 @@ jQuery(document).ready(function() {
 	// map type option
 	var type = new Array();
 	// default map is 'roadmap + customlayer'
-	//setMapTypeId(type);
+	layerInput(type);
 	// update 'type' array
 	function updateTypeArray(obj) {
 		var type = new Array(); // empty 'type'
