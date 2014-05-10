@@ -4,7 +4,7 @@ All functions action with databases.
 Version 1.0.0
 */
 // Include config.php
-include_once $_SERVER['DOCUMENT_ROOT'].'/github/thesis/administrator/config.php';
+require_once(dirname(__FILE__) . '/../config.php');
 
 // Connect to server
 /* 

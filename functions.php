@@ -1,5 +1,5 @@
 <?php  
-include_once $_SERVER['DOCUMENT_ROOT'].'/github/thesis/administrator/functions.php';
+require_once(dirname(__FILE__) . '/administrator/functions.php');
 /*require_once('includes/Encoding.php'); 
 use \ForceUTF8\Encoding;*/
 

@@ -61,14 +61,18 @@ if(isset($_GET['action']) && $_GET['action'] == 'logout')
 					<p><input type="email" name="rg_e" id="rg_e" placeholder="Enter your email..." required></p>
 					<p><input type="password" name="rg_p" id="rg_p" placeholder="Enter your password..." required></p>
 					<p><input type="password" name="rg_rep" id="rg_rep" placeholder="Re-enter your password..." required></p>
-					<p style="font-size: 11px; color: #ababab;">Bạn đồng ý với <a href="#">điều khoản sử dụng và cam kết</a> của chúng tôi bằng cách đăng ký. </p>
+					<p style="font-size: 11px; color: #ababab;">
+						By clicking Register, you agree to our <a href="#">Terms</a> and that you have read our <a href="">Data Use Policy</a>.
+					</p>
 					<p><input type="submit" value="Register"></p>
 				</form>
 				<p><a id="redirect_login" href="javascript:void(0);">Back to Login</a></p>
 			</div>
 		</div>
 		<div class="fullpage hidden">
-			div.
+			<div class="popup">
+				
+			</div>
 		</div>
 	</div>
 </body>

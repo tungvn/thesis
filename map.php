@@ -44,16 +44,30 @@
 							<fieldset>
 								<legend>Layer selected</legend>
 								<?php $selects = array('id', 'name', 'slug');
-								$wheres = array('type' => 'layer');
-								$rows = getRecords(DBNAME, 'object', $selects, $wheres);
-								if($rows && pg_num_rows($rows) > 0) {
-									$i = 0;
-									while ($row = pg_fetch_array($rows)) { ?>
-									<p>
-										<input type="checkbox" name="layer-<?php echo $row['id']; ?>" id="map_layer_option[<?php echo $i; ?>]" value="<?php echo $row['slug']; ?>">
-										<label for="map_layer_option[<?php echo $i++; ?>]"><?php echo $row['name']; ?></label>
-									</p>
-									<?php }
+								$wheres = array('type' => 'workspace');
+								$wps = getRecords(DBNAME, 'object', $selects, $wheres);
+
+								if($wps && pg_num_rows($wps) > 0) { 
+									while($wp = pg_fetch_array($wps)) {
+										$num = 0;
+										$selects = array('id', 'name', 'slug');
+										$wheres = array('workspace' => $wp['id']);
+										$rows = getRecords(DBNAME, 'object', $selects, $wheres);
+
+										if($rows && pg_num_rows($rows) > 0) {
+											if($num == 0) {
+												echo '<p>' . $wp['name'] . '</p>';
+												$num++;
+											}
+											$i = 0;
+											while ($row = pg_fetch_array($rows)) { ?>
+											<p>
+												<input type="checkbox" name="layer-<?php echo $row['id']; ?>" id="map_layer_option[<?php echo $i; ?>]" value="<?php echo $wp['slug'] . ':' . $row['slug']; ?>">
+												<label for="map_layer_option[<?php echo $i++; ?>]"><?php echo $row['name']; ?></label>
+											</p>
+											<?php }
+										}
+									}
 								} ?>
 							</fieldset>
 						</div>

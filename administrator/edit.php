@@ -1,6 +1,6 @@
 <?php session_start(); 
-include_once('functions.php');
-include_once('includes/settings.php');?>
+require_once(dirname(__FILE__) . '/functions.php');
+require_once(dirname(__FILE__) . '/includes/settings.php'); ?>
 
 <!DOCTYPE html>
 <html>
@@ -15,6 +15,36 @@ include_once('includes/settings.php');?>
 	<script src="js/main.js"></script>
 </head>
 <body>
+	<?php // Add new object
+	if(isset($_POST['submit'])) {
+		$slug = vn_str_filter($_POST['name']);
+		$args = array(
+			'name' => $_POST['name'],
+			'slug' => $slug,
+			'type' => $_POST['type'],
+			'publish' => $_POST['publish'],
+			'description' => $_POST['description']
+		);
+		if($_POST['type'] = 'layer') {
+			$args['workspace'] = $_POST['workspace'];
+			$args['path'] = array();
+
+			$allowedExts = array('dbf', 'prj', 'sbn', 'sbx', 'shp', 'shx');
+			$dir = $_SERVER['DOCUMENT_ROOT'].'/github/thesis/uploads/';
+
+			foreach ($_FILES['shpfile']['name'] as $key => $file) {
+				$temp = explode('.', $_FILES['shpfile']['name'][$key]);
+				$extension = end($temp);
+				if(is_uploaded_file($_FILES['shpfile']['tmp_name'][$key]) && in_array($extension, $allowedExts)) {
+					// Save file
+					move_uploaded_file($_FILES['shpfile']['tmp_name'][$key], $dir . $_FILES['shpfile']['name'][$key]);
+					if($extension == 'shp')
+						$args['shpfile'] = $dir . $_FILES['shpfile']['name'][$key];
+				}
+			}
+		}
+		addNewObject($args);
+	} ?>
 	<?php if(!isset($_SESSION['authorized'])): ?>
 		<?php $link = urlencode(curPageURL());
 		header('Location: login.php?redirect_to=' . $link); ?>
@@ -25,9 +55,9 @@ include_once('includes/settings.php');?>
 				<a href="#"><img src="#" alt="logo"></a>
 			</div>
 			<ul class="top_menu fl">
-				<li><a href="#">Home</a></li>
-				<li><a href="#">Option 1</a></li>
-				<li><a href="#">Option 2</a></li>
+				<li><a href="<?php echo getOption('administrator_url'); ?>">Home</a></li>
+				<!-- <li><a href="#">Option 1</a></li>
+				<li><a href="#">Option 2</a></li> -->
 			</ul>
 			<div class="user_menu fr">
 				<a href="#"><?php echo getCurrentUserID(); ?></a>

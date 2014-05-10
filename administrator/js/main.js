@@ -16,12 +16,13 @@ jQuery(document).ready(function($) {
 	/*---------------------*/
 	/* Submit form */
 	if($('body').find('#object').attr('for') == 'object') {
-		/*var dir = '';
+		var file;
+		var fileInput = $('#object').find('input#shpfile');
 		$('#object').find('input#shpfile').change(function(event) {
-			
-		});*/
-		$('#object').find('form.add-new-object').submit(function(event) {
-			event.preventDefault();
+			file = fileInput.files[0];
+		});
+		//$('#object').find('form.add-new-object').submit(function(event) {
+			/*event.preventDefault();
 			var name = $(this).find('input#name').val();
 			var data = $(this).serializeArray();
 			var slug = toSlug(name);
@@ -61,9 +62,9 @@ jQuery(document).ready(function($) {
 			})
 			.always(function() {
 				console.log("complete");
-				setTimeout(location.reload(), 2000);
-			});
-		});
+				//setTimeout(location.reload(), 2000);
+			});*/
+		//});
 	}
 	/* Auto create slug */
 	function toSlug(str) {

@@ -47,9 +47,9 @@ include_once('includes/settings.php'); ?>
 				<a href="#"><img src="#" alt="logo"></a>
 			</div>
 			<ul class="top_menu fl">
-				<li><a href="#">Home</a></li>
-				<li><a href="#">Option 1</a></li>
-				<li><a href="#">Option 2</a></li>
+				<li><a href="<?php echo getOption('administrator_url'); ?>">Home</a></li>
+				<!-- <li><a href="#">Option 1</a></li>
+				<li><a href="#">Option 2</a></li> -->
 			</ul>
 			<div class="user_menu fr">
 				<a href="#"><?php echo getCurrentUserID(); ?></a>

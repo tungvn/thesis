@@ -10,7 +10,9 @@ Order Role from Highest to Lowest
 	5. subscriber -- only view infomations, can NOT action with anything
 */
 // Include databases.php -- all functions to action with postgresql database
-include_once $_SERVER['DOCUMENT_ROOT'].'/github/thesis/administrator/includes/databases.php';
+require_once(dirname(__FILE__) . '/includes/databases.php');
+require_once(dirname(__FILE__) . '/includes/settings.php');
+require_once(dirname(__FILE__) . '/includes/users.php');
 
 
 function is_admin() {
@@ -106,7 +108,8 @@ function getNumberUser() {
 function addNewForm($obj_type) { ?>
 	<div class="container">
 		<h3 class="div-title">Add new <?php echo $obj_type; ?></h3>
-		<form class="grid-4 add-new-object" method="POST">
+		<?php $enctype = ($obj_type == 'layer') ? 'enctype="multipart/form-data"' : ''; ?>
+		<form class="grid-4 add-new-object" method="POST" action="edit.php?obj=<?php echo $obj_type; ?>" <?php echo $enctype; ?>>
 			<label class="grid-4" for="name">Name<span class="required"></span></label>
 			<input class="grid-4 has-border has-border-radius" type="text" name="name" id="name" required>
 			<input class="grid-4 has-border has-border-radius" type="hidden" name="slug" id="slug">
@@ -121,8 +124,8 @@ function addNewForm($obj_type) { ?>
 					<option value="<?php echo $row['id']; ?>"><?php echo $row['name']; ?></option>
 				<?php endwhile; endif; ?>
 			</select>
-			<label class="grid-4" for="shpfile">Shapefile (.shp)<span class="required"></span></label>
-			<input class="grid-4 has-border has-border-radius" type="file" name="shpfile" id="shpfile" accept=".shp" required>
+			<label class="grid-4" for="shpfile">Shapefile<span class="required"></span><br>(select all shapefiles have the same name)</label>
+			<input class="grid-4 has-border has-border-radius" type="file" name="shpfile[]" id="shpfile" title="Select all shapefiles has the same name" multiple required>
 			<?php endif; ?>
 			<label for="publish" class="grid-4">Publish</label>
 			<select name="publish" id="publish" class="grid-4 has-border has-border-radius">
@@ -131,7 +134,7 @@ function addNewForm($obj_type) { ?>
 			</select>
 			<label class="grid-4" for="description">Description</label>
 			<textarea class="grid-4 has-border has-border-radius" name="description" id="description" rows="10" style="resize: none;"></textarea>
-			<input class="button has-border-radius" type="submit" value="Create">
+			<input class="button has-border-radius" name="submit" type="submit" value="Create">
 		</form>
 	</div>
 	<?php
@@ -242,14 +245,12 @@ function listUsers($obj_type) { ?>
 					<option value="">Choose action</option>
 					<option value="delete">Delete</option>
 				</select>
-				<?php $selects = array('DISTINCT role');
-				$verify = (isset($_GET['verify'])) ? $_GET['verify'] : 1;
-				$wheres = array('verify' => $verify);
-				$rows = getRecords(DBNAME, 'users', $selects, $wheres); ?>
+				<?php $rows = getOption('user_role');
+				$rows = explode(', ', $rows); ?>
 				<select name="change_role" id="change_role" class="grid-1-4 has-border has-border-radius" style="margin-left: 10px;">
-					<option value="">Change role to...</option><?php if($rows && pg_num_rows($rows) > 0): while($row = pg_fetch_array($rows)): ?>
-					<option value="<?php echo $row['role']; ?>"><?php echo ucfirst($row['role']); ?></option>
-					<?php endwhile; endif; ?>
+					<option value="">Change role to...</option><?php foreach ($rows as $key => $row): ?>
+					<option value="<?php echo $row; ?>"><?php echo ucfirst($row); ?></option>
+					<?php endforeach; ?>
 				</select>
 				<input type="submit" value="Apply" class="button fl has-border-radius" style="padding: 7px 10px 6px; margin-left: 10px;">
 				<?php endif; ?>
@@ -372,37 +373,18 @@ if(isset($_POST['action']) && !empty($_POST['action'])) {
 	}
 }
 /* For Ajax call */
-function addNewObject($datas) {
-	$name;
-	$slug;
-	$type;
-	$desc;
-	$workspace;
-	$publish;
-	$shpfile;
-	for($i=0; $i < sizeof($datas);$i++) {
-		if($datas[$i]['name'] == 'name') $name = $datas[$i]['value'];
-		if($datas[$i]['name'] == 'slug') $slug = $datas[$i]['value'];
-		if($datas[$i]['name'] == 'type') $type = $datas[$i]['value'];
-		if($datas[$i]['name'] == 'description') $desc = $datas[$i]['value'];
-		if($datas[$i]['name'] == 'publish') $publish = $datas[$i]['value'];
-		if(isset($type) && $type == 'layer') {
-			if($datas[$i]['name'] == 'workspace') $workspace = $datas[$i]['value'];
-			if($datas[$i]['name'] == 'shpfile') $shpfile = $datas[$i]['value'];
-		}
-	}
-
-	if($type == 'workspace') {
-		$result = createDB($slug);
+function addNewObject($data) {
+	if($data['type'] == 'workspace') {
+		$result = createDB($data['slug']);
 		if($result) {
-			$result_1 = createExtension($slug);
+			$result_1 = createExtension($data['slug']);
 			if($result_1) {
 				$args = array(
-					'name' => $name,
-					'slug' => $slug,
-					'type' => $type,
-					'description' => $desc,
-					'publish' => $publish
+					'name' => $data['name'],
+					'slug' => $data['slug'],
+					'type' => $data['type'],
+					'description' => $data['description'],
+					'publish' => $data['publish']
 				);
 				$result_2 = insertRecords(DBNAME, 'object', $args);
 				if($result_2) {
@@ -410,13 +392,13 @@ function addNewObject($datas) {
 				}
 				else echo 'fail_insert_tb';
 			}
-			else echo 'fail_comment';
+			else echo 'fail_create_extension';
 		}
 		else echo 'fail_create_db';
 	}
-	elseif($type == 'layer') {
+	elseif($data['type'] == 'layer') {
 		$selects = array('slug');
-		$wheres = array('id' => $workspace);
+		$wheres = array('id' => $data['workspace']);
 		$wp_slugs = getRecords(DBNAME, 'object', $selects, $wheres);
 		if($wp_slugs && pg_num_rows($wp_slugs) > 0)
 			$wp_slug = pg_fetch_array($wp_slugs);
@@ -424,15 +406,16 @@ function addNewObject($datas) {
 
 		$shp2pgsql = '"C:/Program Files/PostgreSQL/9.3/bin/shp2pgsql" -s 32448 -W LATIN1 -c -D -I '; 
 		$psql = '"C:/Program Files/PostgreSQL/9.3/bin/psql" -d ' . $wp_slug . ' -U postgres ';
-		$result = exec($shp2pgsql.$shpfile." | ".$psql);
+		$result = exec($shp2pgsql . $data['shpfile'] . " | " . $psql);
+
 		if($result == 'COMMIT') {
 			$args = array(
-				'name' => $name,
-				'slug' => $slug,
-				'type' => $type,
-				'workspace' => $workspace,
-				'description' => $desc,
-				'publish' => $publish
+				'name' => $data['name'],
+				'slug' => $data['slug'],
+				'type' => $data['type'],
+				'workspace' => $data['workspace'],
+				'description' => $data['description'],
+				'publish' => $data['publish']
 			);
 			$result_2 = insertRecords(DBNAME, 'object', $args);
 			if($result_2) {
@@ -441,7 +424,7 @@ function addNewObject($datas) {
 			else echo 'fail_insert_tb';
 		}
 		else {
-			echo 'fail_insert_tb';
+			echo 'fail_import_shapefile';
 		}
 	}
 }
@@ -551,5 +534,27 @@ function changeRole($datas) {
 	
 	echo $check;
 }
-
+/* String to slug */
+function vn_str_filter($str) {
+	$unicode = array(
+		'a'=>'á|à|ả|ã|ạ|ă|ắ|ặ|ằ|ẳ|ẵ|â|ấ|ầ|ẩ|ẫ|ậ',
+		'd'=>'đ',
+		'e'=>'é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ',
+		'i'=>'í|ì|ỉ|ĩ|ị',
+		'o'=>'ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ',
+		'u'=>'ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự',
+		'y'=>'ý|ỳ|ỷ|ỹ|ỵ',
+		'A'=>'Á|À|Ả|Ã|Ạ|Ă|Ắ|Ặ|Ằ|Ẳ|Ẵ|Â|Ấ|Ầ|Ẩ|Ẫ|Ậ',
+		'D'=>'Đ',
+		'E'=>'É|È|Ẻ|Ẽ|Ẹ|Ê|Ế|Ề|Ể|Ễ|Ệ',
+		'I'=>'Í|Ì|Ỉ|Ĩ|Ị',
+		'O'=>'Ó|Ò|Ỏ|Õ|Ọ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ',
+		'U'=>'Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự',
+		'Y'=>'Ý|Ỳ|Ỷ|Ỹ|Ỵ',
+	);
+	foreach($unicode as $nonUnicode=>$uni) {
+		$str = preg_replace("/($uni)/i", $nonUnicode, $str);
+	}
+	return preg_replace('/[^A-Za-z0-9-]+/', '', $str);
+}
 ?>
