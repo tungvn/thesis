@@ -10,6 +10,7 @@ Order Role from Highest to Lowest
 	5. subscriber -- only view infomations, can NOT action with anything
 */
 // Include databases.php -- all functions to action with postgresql database
+require_once(dirname(__FILE__) . '/config.php');
 require_once(dirname(__FILE__) . '/includes/databases.php');
 require_once(dirname(__FILE__) . '/includes/settings.php');
 require_once(dirname(__FILE__) . '/includes/users.php');
@@ -168,10 +169,17 @@ function listObject($obj_type) { ?>
 					$i = 0;
 					while ($row = pg_fetch_array($rows)) { ?>
 						<div class="grid-4 row">
+							<?php if(is_subscriber()): ?>
+							<div class="grid-1-16"><input type="checkbox" name="<?php echo $obj_type . '-' . $row['id']; ?>" id="select[<?php echo $i++; ?>]"></div>
+							<div class="grid-3-16"><?php echo $row['id'] ?></div>
+							<div class="grid-1-4"><?php echo $row['name'] ?></div>
+							<div class="grid-1-4"><?php echo ($row['description'] != '') ? $row['description'] : '&nbsp;'; ?></div>	
+							<?php else: ?>
 							<div class="grid-1-16"><input type="checkbox" name="<?php echo $obj_type . '-' . $row['id']; ?>" id="select[<?php echo $i++; ?>]"></div>
 							<div class="grid-3-16"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['id']; ?>"><?php echo $row['id'] ?></a></div>
 							<div class="grid-1-4"><a href="single.php?obj=<?php echo $obj_type; ?>&amp;<?php echo $obj_type . '=' .$row['id']; ?>"><?php echo $row['name'] ?></a></div>
 							<div class="grid-1-4"><?php echo ($row['description'] != '') ? $row['description'] : '&nbsp;'; ?></div>
+							<?php endif; ?>
 							<div class="grid-1-4">
 							<?php if($obj_type == 'layer'): 
 							$selects = array('slug');
@@ -179,11 +187,12 @@ function listObject($obj_type) { ?>
 							$rows_wp = getRecords(DBNAME, 'object', $selects, $wheres);
 							if($rows_wp && pg_num_rows($rows_wp) > 0) {
 								$row_wp = pg_fetch_array($rows_wp);
-							} ?>
+							} 
+							if(is_subscriber()) echo $row_wp['slug']; else { ?>
 								<a href="single.php?obj=workspace&amp;workspace=<?php echo $row['workspace']; ?>">
 									<?php echo $row_wp['slug']; ?>
 								</a>
-							<?php elseif($obj_type == 'workspace'):
+							<?php } elseif($obj_type == 'workspace'):
 								$selects = array('id', 'slug');
 								$wheres = array(
 									'type' => 'layer',
@@ -193,11 +202,14 @@ function listObject($obj_type) { ?>
 								if(pg_num_rows($rows_inner) > 0):
 									$j = 0;
 									while($row_inner = pg_fetch_array($rows_inner)): 
-										echo ($j == 0) ? '' : ', '; ?>
-									<a href="single.php?obj=layer&amp;layer=<?php echo $row_inner['id']; ?>">
-										<?php echo $row_inner['slug']; ?>
-									</a>
-									<?php $j++; endwhile; endif; ?>
+										echo ($j == 0) ? '' : ', '; 
+										if(is_subscriber())
+											echo $row_inner['slug']; 
+										else { ?>
+										<a href="single.php?obj=layer&amp;layer=<?php echo $row_inner['id']; ?>">
+											<?php echo $row_inner['slug']; ?>
+										</a>
+									<?php } $j++; endwhile; endif; ?>
 							<?php endif; ?>
 							</div>
 						</div> 
@@ -240,7 +252,7 @@ function listUsers($obj_type) { ?>
 		<h3 class="div-title">Lists of <?php echo $obj_type; ?></h3>
 		<form class="grid-4 list-object list-users" method="POST">
 			<div class="grid-4">
-				<?php if(is_admin() || is_moder()): ?>
+				<?php if(is_admin()): ?>
 				<select name="action" id="action" class="grid-1-4 has-border has-border-radius">
 					<option value="">Choose action</option>
 					<option value="delete">Delete</option>
@@ -317,7 +329,7 @@ function edit($obj_type) { ?>
 		<div class="grid-3">
 			<?php listObject($obj_type); ?>
 		</div>
-		<?php elseif(is_editor()): ?>
+		<?php elseif(is_editor() || is_subscriber()): ?>
 		<div class="grid-4">
 			<?php listObject($obj_type); ?>
 		</div>
@@ -325,7 +337,7 @@ function edit($obj_type) { ?>
 	</div>
 	<?php else: ?>
 	<div id="object" class="fl" for="users">
-	<?php if(is_admin()): ?>
+	<?php if(is_admin() || is_moder()): ?>
 		<div class="grid-4">
 		<?php listUsers($obj_type); ?>
 		</div>
@@ -355,10 +367,26 @@ function getObjects($obj_type, $limit = 99999, $offset = 0) {
 
 /*-------------------------------------single.php-----------------------------------------------*/
 function single($obj_type, $obj) {
-	echo $obj_type . '<br>' .$obj;
+	singleObject($obj_type, $obj);
 }
 
-
+function singleObject($obj_type, $obj) { ?>
+<form id="update_object" class="grid-4 fl" method="POST" action="">
+	<div class="row">
+		<div class="grid-1-4">
+			Name
+		</div>
+		<div class="grid-3">
+			<input type="text" class="has-border has-border-radius grid-4">
+		</div>
+	</div>
+	<div class="row">
+		<div class="grid-4 fl">
+			<input type="submit" class="button has-border-radius" value="Update">
+		</div>
+	</div>
+</form>
+<?php }
 /*-------------------------------------single.php-----------------------------------------------*/
 
 

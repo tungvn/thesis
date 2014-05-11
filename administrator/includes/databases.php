@@ -3,8 +3,6 @@
 All functions action with databases.
 Version 1.0.0
 */
-// Include config.php
-require_once(dirname(__FILE__) . '/../config.php');
 
 // Connect to server
 /* 

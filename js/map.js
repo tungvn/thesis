@@ -9,7 +9,7 @@ jQuery(document).ready(function() {
 		var type = new Array(); // empty 'type'
 		// update
 		$(obj).parents('div.map_option_block').find('input:checked').each(function() {
-			type[type.length] = $(this).val();
+			type.push($(this).val());
 		});
 		return type;
 	}
@@ -22,10 +22,6 @@ jQuery(document).ready(function() {
 		});
 		// update 'type'
 		type = updateTypeArray(this);
-		console.log(type);
-		
 		layerInput(type);
-		// set map type id follow input
-		//setMapTypeId(type);
 	});
 });

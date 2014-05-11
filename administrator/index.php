@@ -89,8 +89,11 @@ include_once('includes/settings.php');?>
 						<div class="container has-border has-border-radius">
 							<h3 class="div-title">User</h3>
 							<div class="the-content fl">
-								<p>We have <a href="edit.php?obj=users"><?php echo getNumberUser(); ?></a> user(s). 
-									<?php if(is_admin()): ?>
+								<p>We have <?php if(is_subscriber()) echo getNumberUser(); else { ?>
+									<a href="edit.php?obj=users"><?php echo getNumberUser(); ?></a>
+									<?php } 
+									echo ' user(s).';
+									if(is_admin()): ?>
 									<a class="button has-border-radius" href="edit.php?obj=users">View User</a>
 									<?php endif; ?>
 								</p>

@@ -2,9 +2,6 @@
 /*
 All scripts of users.
 */
-require_once(dirname(__FILE__) . '/databases.php');
-// Include config.php
-require_once(dirname(__FILE__) . '/../config.php');
 
 // function to escape data and strip tags
 function safestrip($string){

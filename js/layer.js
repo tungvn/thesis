@@ -309,9 +309,12 @@ function layerInput(layers) {
     if(layers.length == 0 || typeof(layers) === 'undefined') {
         layers = new Array('boundary');
     }
+
     var arrayLayers = new Array();
 
     for (var i = 0; i < layers.length; i++) {
+        console.log(layers[i]);
+        var temp;
         if(i == 0)
             var temp = new OpenLayers.Layer.WMS( layers[i],
                 mainUrl, 
@@ -326,5 +329,6 @@ function layerInput(layers) {
             );
         arrayLayers.push(temp);
     }
+
     init(arrayLayers);
 }

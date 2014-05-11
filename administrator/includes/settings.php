@@ -4,9 +4,6 @@ settings.php
 All functions actions with Page Settings
 */
 
-// Include databases.php -- all functions to action with postgresql database
-require_once(dirname(__FILE__) . '/databases.php');
-
 function registerOption($name, $value = '', $desc = '') {
 	$args = array(
 		'name' => $name,

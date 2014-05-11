@@ -89,11 +89,9 @@ require_once(dirname(__FILE__) . '/includes/settings.php'); ?>
 							<p><?php echo @$_POST['notification']; ?></p>
 						</div>
 					</div>
-					<?php if((is_admin() || is_moder() || is_editor()) && $_GET['obj'] == 'workspace')
+					<?php if(isset($_GET['obj']) && ($_GET['obj'] == 'workspace' || $_GET['obj'] == 'layer'))
 						edit($_GET['obj']);
-					elseif((is_admin() || is_moder() || is_editor()) && $_GET['obj'] == 'layer')
-						edit($_GET['obj']);
-					elseif(is_admin() && $_GET['obj'] == 'users')
+					elseif($_GET['obj'] == 'users')
 						edit($_GET['obj']);
 					else
 						echo 'Access denied!';

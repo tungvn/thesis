@@ -52,8 +52,13 @@ include_once('includes/settings.php');?>
 				<div class="container">
 					<?php if(isset($_GET['obj']) && isset($_GET[$_GET['obj']])): 
 					$obj_type = $_GET['obj']; 
-					$obj = $_GET[$_GET['obj']]; ?>
-					<h2 class="div-title"><?php echo ucfirst($obj_type) . ' > <span style="color: #1155ff;">' . $obj . '</span>'; ?></h2>
+					$obj = $_GET[$_GET['obj']];
+					$selects = array('name', 'slug');
+					$wheres = array('id' => $obj);
+					$rows = getRecords(DBNAME, 'object', $selects, $wheres);
+					if($rows && pg_num_rows($rows) == 1)
+						$row = pg_fetch_array($rows); ?>
+					<h2 class="div-title"><?php echo ucfirst($obj_type) . ' > <span style="color: #1155ff;">' . $row['name'] . '</span>'; ?></h2>
 					<div id="notification" class="grid-4">
 						<div class="container">
 							<span class="info fl hidden"></span>
@@ -66,7 +71,7 @@ include_once('includes/settings.php');?>
 						single($obj_type, $obj);
 					elseif((is_admin() || is_moder() || is_editor()) && $obj_type == 'layer')
 						single($obj_type, $obj);
-					elseif(is_admin() && $obj_type == 'users')
+					elseif($obj_type == 'users')
 						single($obj_type, $obj);
 					else
 						echo 'Access denied!';
