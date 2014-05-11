@@ -127,9 +127,9 @@
 			}
 
 			// Window resize
-			$(window).resize(function() {
+			/*$(window).resize(function() {
 				setMapHeight();
-			});
+			});*/
 
 			// Show and hide charts
 			$('#charts_link').click(function() {
