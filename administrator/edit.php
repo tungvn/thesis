@@ -17,15 +17,16 @@ require_once(dirname(__FILE__) . '/functions.php');
 <body>
 	<?php // Add new object
 	if(isset($_POST['submit'])) {
-		$slug = vn_str_filter($_POST['name']);
+		// $slug = vn_str_filter($_POST['name']);
 		$args = array(
-			'name' => $_POST['name'],
-			'slug' => $slug,
 			'type' => $_POST['type'],
 			'publish' => $_POST['publish'],
 			'description' => $_POST['description']
 		);
-		if($_POST['type'] = 'layer') {
+		if($_POST['type'] == 'workspace') {
+			$args['name'] = $_POST['name'];
+		}
+		if($_POST['type'] == 'layer') {
 			$args['workspace'] = $_POST['workspace'];
 			$args['path'] = array();
 
@@ -38,8 +39,10 @@ require_once(dirname(__FILE__) . '/functions.php');
 				if(is_uploaded_file($_FILES['shpfile']['tmp_name'][$key]) && in_array($extension, $allowedExts)) {
 					// Save file
 					move_uploaded_file($_FILES['shpfile']['tmp_name'][$key], $dir . $_FILES['shpfile']['name'][$key]);
-					if($extension == 'shp')
+					if($extension == 'shp') {
 						$args['shpfile'] = $dir . $_FILES['shpfile']['name'][$key];
+						$args['name'] = $_FILES['shpfile']['name'][$key];
+					}
 				}
 			}
 		}
@@ -56,6 +59,7 @@ require_once(dirname(__FILE__) . '/functions.php');
 			</div>
 			<ul class="top_menu fl">
 				<li><a href="<?php echo getOption('administrator_url'); ?>">Home</a></li>
+				<li><a href="<?php echo getOption('base_url'). '/map.php'; ?>">Visit Map</a></li>
 				<!-- <li><a href="#">Option 1</a></li>
 				<li><a href="#">Option 2</a></li> -->
 			</ul>
@@ -63,6 +67,11 @@ require_once(dirname(__FILE__) . '/functions.php');
 				<a href="#"><?php echo getCurrentUserID(); ?></a>
 				<a href="login.php?action=logout">Log out</a>
 			</div>
+			<form class="search_box fr">
+				<input class="has-border-radius" type="text" name="s" id="s" placeholder="Enter your keywords" autocomplete="on" style="width: 300px;">
+				<input class="hidden" type="submit" value="Search">
+				<!-- <a href="#">Advance Search</a> -->
+			</form>
 		</div>
 		<div id="body" class="fl clearfix">
 			<div class="left_menu fl">

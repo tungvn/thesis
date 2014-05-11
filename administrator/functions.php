@@ -6,8 +6,7 @@ Order Role from Highest to Lowest
 	2. moderator -- full setting, expect any users' setting
 	3. editor -- full editing available workspaces, layers information 
 					but can NOT create or remove ones
-	4. publisher -- only publish available infomations, expect users verify
-	5. subscriber -- only view infomations, can NOT action with anything
+	4. subscriber -- only view infomations, can NOT action with anything
 */
 // Include databases.php -- all functions to action with postgresql database
 require_once(dirname(__FILE__) . '/config.php');
@@ -111,8 +110,10 @@ function addNewForm($obj_type) { ?>
 		<h3 class="div-title">Add new <?php echo $obj_type; ?></h3>
 		<?php $enctype = ($obj_type == 'layer') ? 'enctype="multipart/form-data"' : ''; ?>
 		<form class="grid-4 add-new-object" method="POST" action="edit.php?obj=<?php echo $obj_type; ?>" <?php echo $enctype; ?>>
+			<?php if($obj_type == 'workspace'): ?>
 			<label class="grid-4" for="name">Name<span class="required"></span></label>
 			<input class="grid-4 has-border has-border-radius" type="text" name="name" id="name" required>
+			<?php endif; ?>
 			<input class="grid-4 has-border has-border-radius" type="hidden" name="slug" id="slug">
 			<input type="hidden" name="type" id="type" value="<?php echo $obj_type; ?>">
 			<?php if($obj_type == 'layer'): ?>
@@ -367,26 +368,98 @@ function getObjects($obj_type, $limit = 99999, $offset = 0) {
 
 /*-------------------------------------single.php-----------------------------------------------*/
 function single($obj_type, $obj) {
-	singleObject($obj_type, $obj);
+	if(is_admin() || is_moder() || is_editor())
+		singleObject($obj_type, $obj);
+	else 
+		echo '<p>Access denied</p>';
 }
 
-function singleObject($obj_type, $obj) { ?>
-<form id="update_object" class="grid-4 fl" method="POST" action="">
-	<div class="row">
-		<div class="grid-1-4">
-			Name
+function singleObject($obj_type, $obj) { 
+	$selects = array('*');
+	$wheres = array('id' => $obj);
+	$rows = getRecords(DBNAME, 'object', $selects, $wheres);
+	if($rows && pg_num_rows($rows) == 1):
+		$row = pg_fetch_array($rows);
+	if($obj_type == 'workspace'): ?>
+	<form id="update_object" class="grid-4 fl" method="POST">
+		<div class="row">
+			<div class="grid-1-4">
+				<label for="<?php echo $obj_type . 'name'; ?>">Name</label>
+			</div>
+			<div class="grid-3">
+				<input type="text" class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'name'; ?>" id="<?php echo $obj_type . 'name'; ?>" value="<?php echo $row['name']; ?>">
+				<p class="grid-4"><i>Name of Workspace</i></p>
+			</div>
 		</div>
-		<div class="grid-3">
-			<input type="text" class="has-border has-border-radius grid-4">
+		<div class="row">
+			<div class="grid-1-4">
+				<label for="<?php echo $obj_type . 'slug'; ?>">Slug</label>
+			</div>
+			<div class="grid-3">
+				<input type="text" class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'slug'; ?>" id="<?php echo $obj_type . 'slug'; ?>" value="<?php echo $row['slug']; ?>" readonly>
+				<p class="grid-4"><i>Slug of Workspace</i></p>
+			</div>
 		</div>
-	</div>
+		<div class="row">
+			<div class="grid-1-4">
+				<label for="<?php echo $obj_type . 'publish'; ?>">Publish</label>
+			</div>
+			<div class="grid-3">
+				<?php $selected = (!$row['publish']) ? 'selected' : ''; ?>
+				<select class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'publish'; ?>" id="<?php echo $obj_type . 'publish'; ?>">
+					<option value="1">Publish</option>
+					<option value="0" <?php echo $selected; ?>>Unpublish</option>
+				</select>
+				<p class="grid-4"><i>Publish or Unpublish Workspace</i></p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="grid-1-4">
+				<label for="<?php echo $obj_type . 'description'; ?>">Description</label>
+			</div>
+			<div class="grid-3">
+				<textarea class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'desc'; ?>" id="<?php echo $obj_type . 'description'; ?>" rows="10"><?php echo $row['description']; ?></textarea>
+				<p class="grid-4"><i>Description of Workspace</i></p>
+			</div>
+		</div>
+		<?php $selects = array('id', 'name');
+		$wheres = array('workspace' => $row['id']);
+		$rows_inner = getRecords(DBNAME, 'object', $selects, $wheres);
+		if($rows_inner && pg_num_rows($rows_inner) > 0): $i = 0; ?>
+		<div class="row">
+			<div class="grid-1-4">
+				<p>Layers of "<?php echo ucfirst($row['name']); ?>"</p>
+			</div>
+			<div class="grid-3">
+				<p>
+				<?php while($row_inner = pg_fetch_array($rows_inner)): ?>
+				
+					<?php echo ($i++ != 0) ? ', ' : ''; ?>
+					<a href="single.php?obj=layer&amp;layer=<?php echo $row_inner['id']; ?>"><?php echo $row_inner['name']; ?></a>
+				<?php endwhile; ?>
+				</p>
+			</div>
+		</div>
+		<?php endif; ?>
+	<?php else: ?>
+	<form id="update_object" class="grid-4 fl" method="POST">
+		<div class="row">
+			<div class="grid-1">
+				<div class="grid-4">
+						
+				</div>
+			</div>
+			<div id="map" class="grid-3"></div>
+		</div>
+	<?php endif; ?>
 	<div class="row">
 		<div class="grid-4 fl">
-			<input type="submit" class="button has-border-radius" value="Update">
+			<input name="submit" type="submit" class="button has-border-radius" value="Update">
 		</div>
 	</div>
 </form>
-<?php }
+<?php endif;
+}
 /*-------------------------------------single.php-----------------------------------------------*/
 
 
@@ -398,6 +471,7 @@ if(isset($_POST['action']) && !empty($_POST['action'])) {
 		case 'submit_delete_object' : deleteObject($_POST['data']); break;
 		case 'delete_users' : deleteUsers($_POST['data']); break;
 		case 'change_role_users' : changeRole($_POST['data']); break;
+		case 'search_tool': preSearchTool($_POST['group'], $_POST['keyword']); break;
 	}
 }
 /* For Ajax call */
@@ -439,7 +513,7 @@ function addNewObject($data) {
 		if($result == 'COMMIT') {
 			$args = array(
 				'name' => $data['name'],
-				'slug' => $data['slug'],
+				'slug' => vn_str_filter($data['name']),
 				'type' => $data['type'],
 				'workspace' => $data['workspace'],
 				'description' => $data['description'],
@@ -585,4 +659,61 @@ function vn_str_filter($str) {
 	}
 	return preg_replace('/[^A-Za-z0-9-]+/', '', $str);
 }
+
+/* Search Tools */
+function preSearchTool($datas, $keyword) {
+	$arrayLayers = array();
+	foreach ($datas as $data) {
+		$temp_arrLayers = array();
+		foreach ($data['layers'] as $temp_arrLayer) {
+			array_push($temp_arrLayers, substr($temp_arrLayer, strpos($temp_arrLayer, ':')+1));
+		}
+		
+		$arrayLayers[$data['workspace']] = $temp_arrLayers;
+	}
+	searchTools($arrayLayers, $keyword);
+}
+
+function searchTools($arrayLayers, $keyword) {
+	$result = array();
+
+	foreach ($arrayLayers as $workspace => $layers) {
+		foreach ($layers as $key => $layer) {
+			$rows = getFields($workspace, $layer);
+			if($rows) {
+				$select = '';
+				$wheres = '';
+				$i = 0;
+				foreach ($rows as $column_name => $data_type) {
+					if($column_name != 'geom') {
+						if($i != 0) {
+							$select .= ', ';
+							$wheres .= ' OR ';
+						}
+						$select .= $column_name;
+						$wheres .= "cast($column_name as text) LIKE '%$keyword%'";
+					}
+					else {
+						$select_more = ', ST_AsGeoJSON(geom) as latlng';
+					}
+					$i++;
+				}
+				$sql = "SELECT $select $select_more FROM $layer WHERE $wheres";
+				$rows = pg_query($sql);
+
+				if($rows && pg_num_rows($rows) > 0) {
+					while($row = pg_fetch_array($rows)) {
+						array_push($result, $row);
+					}
+				}
+			}
+		}
+	}
+	if(!empty($result)) {
+		print_r($result);
+	}
+	else
+		echo 'I cannot fucking find anything you search, bitch!';
+}
+
 ?>

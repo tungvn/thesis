@@ -1,5 +1,5 @@
-<?php error_reporting(E_ALL); ?>
-<?php include_once('/functions.php'); ?>
+<?php session_start(); ?>
+<?php include_once(dirname(__FILE__) . '/functions.php'); ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,28 +13,33 @@
 </head>
 <body>
 	<div id="wrapper">
-		<div id="header">
-			<div class="logo">
-				<a href="#" target="_blank">
-					<img src="#" alt="Logo">
-				</a>
+		<div id="header" class="fl clearfix">
+			<div class="logo fl">
+				<a href="#"><img src="#" alt="logo"></a>
 			</div>
-			<!-- end .logo -->
-			<form class="search_box">
-				<input type="text" name="s" id="s" placeholder="Enter your keywords" autocomplete="off">
-				<input type="submit" value="Search">
-				<a href="#">Advance Search</a>
+			<ul class="top_menu fl">
+				<li><a href="index.html">Home</a></li>
+				<li class="current-menu-item"><a href="map.php">Map</a></li>
+				<li><a id="charts_link" href="javascript:void(0);">Charts</a></li>
+				<li><a href="<?php echo getOption('administrator_url'); ?>">Dashboard</a></li>
+			</ul>
+			<div class="user_menu fr">
+			<?php if(isset($_SESSION['authorized'])): ?>
+				<a href="#"><?php echo getCurrentUserID(); ?></a>
+				<a href="<?php echo getOption('administrator_url'); ?>/login.php?action=logout">Log out</a>
+			<?php else: 
+				$link = urlencode(curPageURL()); ?>
+				<a href="<?php echo getOption('administrator_url'); ?>/login.php?redirect_to=<?php echo $link; ?>">Login</a>
+			<?php endif; ?>
+			</div>
+			<form class="search_box fr">
+				<input class="has-border-radius" type="text" name="s" id="s" placeholder="Enter your keywords" autocomplete="on" style="width: 300px;">
+				<input class="hidden" type="submit" value="Search">
+				<!-- <a href="#">Advance Search</a> -->
 			</form>
-			<div class="nav">
-				<ul class="menu">
-					<li><a href="index.html">Home</a></li>
-					<li class="current-menu-item"><a href="map.php">Map</a></li>
-					<li><a id="charts_link" href="javascript:void(0);">Charts</a></li>
-				</ul>
-			</div>
 		</div>
 		<!-- end #header -->
-		<div id="content">
+		<div id="content" class="fl clearfix">
 			<div class="left_col">
 				<div class="col_title">
 					<h2>Lớp bản đồ</h2>
@@ -56,9 +61,10 @@
 										$rows = getRecords(DBNAME, 'object', $selects, $wheres);
 
 										if($rows && pg_num_rows($rows) > 0) {
-											echo '<div class="workspace">';
+											echo '<div class="workspace" for=' . $wp['slug'] . '>';
 											if($num == 0) {
-												echo '<p class="div-title">' . $wp['name'] . '</p>';
+												echo '<p class="div-title">' . ucfirst($wp['name']) . '</p>';
+												echo '<div class="the-content" style="padding-left: 20px;">';
 												$num++;
 											}
 											$i = 0;
@@ -68,28 +74,24 @@
 												<label for="map_layer_option[<?php echo $wp['id']; ?>][<?php echo $i++; ?>]"><?php echo $row['name']; ?></label>
 											</p>
 											<?php }
-											echo '</div>';
+											echo '</div></div>';
 										}
 									}
 								} ?>
 							</fieldset>
 						</div>
-						<div class="map_option_block">
-							<legend for="map_info">Point Infomation</legend>
-							<div id="map_info">
-								<p><i>Click to view map-point information!</i></p>
-							</div>
-						</div>
-						<div class="map_option_block">
+						<div class="map_option_block hidden">
 							<legend for="map_info">Search Result</legend>
 							<ul id="search-result" class="search-result">
 							</ul>
 						</div>
 					</div>
 				</div>
+				<p class="footer">&copy; Copyright by TungVN 2014</p>
 			</div>
-			<div class="main_col">
-				<div id="map"></div>
+			<div class="main_col fl">
+				<div id="map">
+				</div>
 				<!-- show map -->
 				<div id="responseText"></div>
 			</div>
@@ -105,84 +107,11 @@
 				</div>
 			</div>
 		</div>
-		<!-- end #map -->
-		<div id="footer">
-			<p>&copy; 2014 by Fimo Center. Site by TungVN</p>
-		</div>
-		<!-- end #footer -->
 	</div>
 	<!-- end #wrapper -->
 	<div id="wrapper-extra">
 		<!--<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>-->
 		<script src="js/jquery-1.9.1.js"></script>
-		<script>
-		jQuery(document).ready(function() {
-			// Default set map height = windows height
-			setMapHeight();
-
-			// Set map height = windows height 
-			function setMapHeight() {
-				var window_height = $(window).height();
-				$('#content > .left_col, #content > .main_col, #content > .right_col').height(window_height-69);
-			}
-
-			// Window resize
-			/*$(window).resize(function() {
-				setMapHeight();
-			});*/
-
-			// Show and hide charts
-			$('#charts_link').click(function() {
-
-				$('#content .main_col').stop().animate({width: '50%'}, 400);
-				$('#responseText').animate({width: '50%'}, 400);
-				$('#content .right_col').stop().animate({right: 0}, 400);
-
-				$('#close_charts_col').click(function() {
-					hide_charts_col();
-				});
-
-				function hide_charts_col() {
-					$('#content .main_col').stop().animate({width: '80%'}, 400);
-					$('#content .right_col').stop().animate({right: '-30%'}, 400);
-					$('#responseText').animate({width: '100%'}, 400);
-				}
-			});
-
-			$('input#s').keyup(function(event) {
-				event.preventDefault();
-				if(event.keyCode == 32) {
-					//setTimeout(500);
-					var data = $.trim($(this).val());
-					if ( data!='')
-					{	
-						data = convertU2T(data);
-						var request = {
-							keyword: data
-						}
-						$.ajax({
-							url: 'functions.php',
-							type: 'POST',
-							data: request,
-							
-						})
-						.done(function(response) {
-							console.log(response);
-							response = convertT2U(response);													
-							$("ul#search-result").html(response);
-						})
-						.fail(function() {
-							console.log("error");
-						})
-						.always(function() {
-							console.log("complete");
-						});
-					}
-				}
-			});
-		});
-
-		</script>
 		<script type="text/javascript" src="js/map.js"></script>
 
 		<!--- 

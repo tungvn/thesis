@@ -10,7 +10,6 @@ include_once('includes/settings.php');?>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>Thesis 2014 | <?php echo ucfirst($_GET['obj']); ?> - <?php echo $_GET[$_GET['obj']]; ?> | Administrator | Fimo Center</title>
 	<link rel="stylesheet" href="css/style.css">
-	<!--<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>-->
 	<script src="../js/jquery-1.9.1.js"></script>
 	<script src="js/main.js"></script>
 </head>
@@ -18,7 +17,10 @@ include_once('includes/settings.php');?>
 	<?php if(!isset($_SESSION['authorized'])): ?>
 		<?php $link = urlencode(curPageURL());
 		header('Location: login.php?redirect_to=' . $link); ?>
-	<?php else: ?>
+	<?php else: 
+	if(isset($_POST['submit'])) {
+
+	} ?>
 	<div id="wrapper">
 		<div id="header" class="fl clearfix">
 			<div class="logo fl">
@@ -26,13 +28,19 @@ include_once('includes/settings.php');?>
 			</div>
 			<ul class="top_menu fl">
 				<li><a href="<?php echo getOption('administrator_url'); ?>">Home</a></li>
+				<li><a href="<?php echo getOption('base_url'). '/map.php'; ?>">Visit Map</a></li>
 				<!-- <li><a href="#">Option 1</a></li>
 				<li><a href="#">Option 2</a></li> -->
 			</ul>
 			<div class="user_menu fr">
-				<a href="#">admin</a>
+				<a href="#"><?php echo getCurrentUserID(); ?></a>
 				<a href="login.php?action=logout">Log out</a>
 			</div>
+			<form class="search_box fr">
+				<input class="has-border-radius" type="text" name="s" id="s" placeholder="Enter your keywords" autocomplete="on" style="width: 300px;">
+				<input class="hidden" type="submit" value="Search">
+				<!-- <a href="#">Advance Search</a> -->
+			</form>
 		</div>
 		<div id="body" class="fl clearfix">
 			<div class="left_menu fl">
@@ -58,7 +66,7 @@ include_once('includes/settings.php');?>
 					$rows = getRecords(DBNAME, 'object', $selects, $wheres);
 					if($rows && pg_num_rows($rows) == 1)
 						$row = pg_fetch_array($rows); ?>
-					<h2 class="div-title"><?php echo ucfirst($obj_type) . ' > <span style="color: #1155ff;">' . $row['name'] . '</span>'; ?></h2>
+					<h2 class="div-title"><a href="edit.php?obj=<?php echo $obj_type; ?>"><?php echo ucfirst($obj_type) . '</a> > <span style="color: #1155ff;">' . $row['name'] . '</span>'; ?></h2>
 					<div id="notification" class="grid-4">
 						<div class="container">
 							<span class="info fl hidden"></span>
@@ -67,9 +75,7 @@ include_once('includes/settings.php');?>
 							<p><?php echo @$_POST['notification']; ?></p>
 						</div>
 					</div>
-					<?php if((is_admin() || is_moder() || is_editor()) && $obj_type == 'workspace')
-						single($obj_type, $obj);
-					elseif((is_admin() || is_moder() || is_editor()) && $obj_type == 'layer')
+					<?php if((is_admin() || is_moder() || is_editor()) && ($obj_type == 'workspace' || $obj_type == 'layer'))
 						single($obj_type, $obj);
 					elseif($obj_type == 'users')
 						single($obj_type, $obj);

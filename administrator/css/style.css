@@ -90,6 +90,12 @@ input {
 .grid-4 {
 	width: 100%;
 }
+.row {
+	float: left;
+	display: block;
+	width: 100%;
+	margin: 15px 0;
+}
 #notification p {
 	color: #ff1111;
 	font-size: 14px;
@@ -256,6 +262,10 @@ span.required:after {
 	color: #ffffff;
 	background-color: #000000;
 }
+#header .search_box {
+	margin-right: 30px;
+	margin-top: 3px;
+}
 #body {
 	width: 100%;
 	background-color: #ffffff;
@@ -327,6 +337,9 @@ span.required:after {
 #object .list-object .table .tbody .row {
 	padding: 7px 0 5px;
 }
+#object .list-object .table .tbody .row {
+	margin: 5px 0;
+}
 #object .list-object .table .tfoot {
 	padding: 7px 0;
 }
@@ -344,4 +357,8 @@ span.required:after {
 	padding: 5px 10px;
 	margin: 0 5px;
 	background-color: #000000;
+}
+#update_object .row input, #update_object .row textarea,
+#update_object .row select {
+	padding: 5px 10px;
 }

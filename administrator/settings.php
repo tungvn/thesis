@@ -55,6 +55,11 @@ include_once('includes/settings.php'); ?>
 				<a href="#"><?php echo getCurrentUserID(); ?></a>
 				<a href="login.php?action=logout">Log out</a>
 			</div>
+			<form class="search_box fr">
+				<input class="has-border-radius" type="text" name="s" id="s" placeholder="Enter your keywords" autocomplete="on" style="width: 300px;">
+				<input class="hidden" type="submit" value="Search">
+				<!-- <a href="#">Advance Search</a> -->
+			</form>
 		</div>
 		<div id="body" class="fl clearfix">
 			<div class="left_menu fl">

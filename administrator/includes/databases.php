@@ -139,6 +139,25 @@ function dropTable($namedb, $nametb) {
 	return false;
 }
 
+// Field
+function getFields($namedb, $nametb) {
+	$link = connectDB(HOST, $namedb, DBUSER, DBPASS);
+
+	$sql = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '$nametb'";
+	$rows = pg_query($link, $sql);
+
+	$result = array();
+
+	if($rows && pg_num_rows($rows) > 0) {
+		while($row = pg_fetch_array($rows)) {
+			$result[$row['column_name']] = $row['data_type'];
+		}
+		return $result;
+	}
+	return false;
+
+}
+
 // Records
 function insertRecords($namedb, $nametb, $args = array()) {
 	$link = connectDB(HOST, $namedb, DBUSER, DBPASS);

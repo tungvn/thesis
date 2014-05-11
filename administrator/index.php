@@ -26,13 +26,18 @@ include_once('includes/settings.php');?>
 			</div>
 			<ul class="top_menu fl">
 				<li><a href="<?php echo getOption('administrator_url'); ?>">Home</a></li>
-				<!-- <li><a href="#">Option 1</a></li>
-				<li><a href="#">Option 2</a></li> -->
+				<li><a href="<?php echo getOption('base_url'). '/map.php'; ?>">Visit Map</a></li>
+				<!-- <li><a href="#">Option 2</a></li> -->
 			</ul>
 			<div class="user_menu fr">
 				<a href="#"><?php echo getCurrentUserID(); ?></a>
 				<a href="login.php?action=logout">Log out</a>
 			</div>
+			<form class="search_box fr">
+				<input class="has-border-radius" type="text" name="s" id="s" placeholder="Enter your keywords" autocomplete="on" style="width: 300px;">
+				<input class="hidden" type="submit" value="Search">
+				<!-- <a href="#">Advance Search</a> -->
+			</form>
 		</div>
 		<div id="body" class="fl clearfix">
 			<div class="left_menu fl">
