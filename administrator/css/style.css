@@ -1,0 +1,347 @@
+/* Name: style.css */
+/* Reset CSS */
+*, *:before, *:after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	border: none;
+}
+body {
+	font-family: "Open Sans", sans-serif;
+	font-size: 13px;
+	color: #444444;
+	line-height: 20px;
+}
+h1 {
+	font-size: 26px;
+	line-height: 35px;
+}
+h2 {
+	font-size: 20px;
+	line-height: 30px;
+}
+h3 {
+	font-size: 16px;
+	line-height: 25px;
+}
+p {
+	font-size: 13px;
+	line-height: 18px;
+}
+a, a:visited {
+	color: #1155ff;
+	text-decoration: none;
+}
+ol, ul , li {
+	list-style: none outside none;
+}
+input {
+	padding: 5px;
+}
+.clearfix:before, .clearfix:after {
+    content: " ";
+    display: table;
+}
+.clearfix:after {
+    clear: both;
+}
+.fl {
+    float: left;
+}
+.fr {
+    float: right;
+}
+.hidden {
+    display: none;
+}
+/* Grid */
+.grid-1, .grid-1-16, .grid-1-8, .grid-1-4, .grid-2, .grid-3, .grid-3-4, .grid-3-16, .grid-4 {
+	float: left;
+	padding: 0 10px;
+}
+.grid-1 {
+	width: 33.333333%;
+}
+.grid-1-16 {
+	width: 6.25%;
+}
+.grid-1-8 {
+	width: 12.5%;
+}
+.grid-1-4 {
+	width: 25%;
+}
+.grid-2 {
+	width: 50%;
+}
+.grid-3 {
+	width: 66.666666%;
+}
+.grid-3-4 {
+	width: 75%;
+}
+.grid-3-16 {
+	width: 18.75%;
+}
+.grid-4 {
+	width: 100%;
+}
+#notification p {
+	color: #ff1111;
+	font-size: 14px;
+	padding-left: 25px;
+}
+#notification span.info {
+	width: 20px;
+	height: 20px;
+	background: green;
+	vertical-align: middle;
+}
+#notification span.error {
+	width: 20px;
+	height: 20px;
+	background: red;
+	vertical-align: middle;
+}
+#notification span.warning {
+	width: 20px;
+	height: 20px;
+	background: yellow;
+	vertical-align: middle;
+}
+.container {
+	float: left;
+	width: 100%;
+	padding: 10px;
+}
+.div-title {
+	padding: 0 10px;
+}
+.the-content {
+	width: 100%;
+	padding: 10px 5px;
+}
+.has-border {
+	border: 1px solid #b8b8b8;
+}
+.has-border-radius {
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+}
+.button, a.button, a:visited.button {
+	padding: 5px 10px;
+	color: #f1f1f1;
+	background-color: #999999;
+	cursor: pointer;
+	cursor: hand;
+}
+.button:hover, a:hover.button, a:hover.button {
+	color: #ffffff;
+	background-color: #111111;
+}
+span.required {
+	color: #ff0000;
+}
+span.required:after {
+	content: " *";
+}
+/* Login */
+#login_wrapper {
+	bottom: 0;
+    left: 0;
+    overflow: hidden;
+    position: fixed;
+    right: 0;
+    top: 0;
+    background-color: #f9f9f9;
+}
+#login_wrapper .login_box {
+	width: 320px;
+	margin: 0 auto;
+}
+#login_wrapper .login_box .login_box_container {
+	width: 100%;
+	padding: 20px;
+	margin-top: 8%;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+	background-color: #ffffff;
+}
+.login_box_container h1 {
+	margin: 10px 0 15px;
+}
+.login_box_container p {
+	text-align: center;
+}
+.login_box_container p.login_error {
+	color: #ff1100;
+}
+.login_box_container form.login_form {
+	width: 100%;
+	margin: 10px 0;
+}
+.login_box_container form.login_form p {
+	width: 100%;
+	margin: 10px 0;
+}
+.login_box_container form.login_form input {
+	width: 100%;
+	padding: 10px 5px;
+	border: 1px solid #b8b8b8;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+}
+.login_box_container form.login_form input[type="checkbox"] {
+	width: auto;
+	vertical-align: middle;
+}
+.login_box_container form.login_form input[type="submit"] {
+	width: 30%;
+	color: #ffffff;
+	font-size: 16px;
+	padding: 10px;
+	border: none;
+	background-color: #1144ff;
+	cursor: pointer;
+	cursor: hand;
+}
+/* Index */
+#wrapper {
+	width: 100%;
+}
+#header {
+	width: 100%;
+	max-height: 32px;
+	padding: 0 5px;
+	background-color: #222222;
+}
+#header .logo {
+	padding: 0 20px 0 5px;
+	max-height: 32px;
+}
+#header .top_menu li {
+	float: left;
+	position: relative;
+	padding: 6px 0;
+}
+#header .top_menu li a {
+	color: #f1f1f1;
+	padding: 0 10px;
+}
+#header .top_menu li:hover {
+	color: #ffffff;
+	background-color: #000000;
+}
+#header .user_menu {
+	padding: 6px 0 0;
+}
+#header .user_menu a {
+	color: #f1f1f1;
+	padding: 7px 10px;
+}
+#header .user_menu a:hover {
+	color: #ffffff;
+	background-color: #000000;
+}
+#body {
+	width: 100%;
+	background-color: #ffffff;
+	min-height: 700px;
+}
+#body .left_menu {
+	width: 13%;
+	height: 100%;
+	position: relative;
+	background-color: #222222;
+}
+
+#body .left_menu li {
+	float: left;
+	width: 100%;
+}
+#body .left_menu li a {
+	float: left;
+	width: 100%;
+	padding: 8px 10px 8px 20px;
+	color: #f1f1f1;
+}
+#body .left_menu li a:hover {
+	color: #ffffff;
+	background-color: #000000;
+}
+#body .left_menu p.footer {
+	position: absolute;
+	bottom: 0;
+	font-size: 11px;
+	color: #f1f1f1;
+	padding: 5px 10px;
+}
+#body .main_body {
+	width: 87%;
+	min-height: 600px;
+	height: 100%;
+}
+/* Edit administrator */
+#object form.grid-4 label {
+	display: block;
+	color: #111111;
+	font-size: 15px;
+	padding-left: 0;
+	margin: 10px 0 5px;
+	cursor: pointer;
+	cursor: hand;
+}
+#object form.grid-4 input,
+#object form.grid-4 textarea {
+	padding: 5px;
+	margin: 5px 0 10px;
+}
+#object form.grid-4 select {
+	padding: 5px;
+	margin: 5px 0 10px;
+}
+#object form.grid-4 select option {
+	padding: 0 10px;
+}
+#object form.grid-4 input[type="submit"] {
+	padding: 10px 20px;
+}
+#object form.list-object {
+	margin-top: 10px;
+}
+#object .list-object .table .thead,
+#object .list-object .table .tbody,
+#object .list-object .table .tbody .row {
+	padding: 7px 0 5px;
+}
+#object .list-object .table .tfoot {
+	padding: 7px 0;
+}
+#object .list-object .table .thead p {
+	font-weight: bold;
+}
+#object .list-object .table .tfoot a {
+	color: #f1f1f1;
+	padding: 5px 10px;
+	margin: 0 5px;
+	background-color: #999999;
+}
+#object .list-object .table .tfoot li.current-item a {
+	color: #ffffff;
+	padding: 5px 10px;
+	margin: 0 5px;
+	background-color: #000000;
+}
