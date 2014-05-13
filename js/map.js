@@ -78,7 +78,7 @@ jQuery(document).ready(function() {
 	// Search when users press space button
 	$('input#s').keyup(function(event) {
 		event.preventDefault();
-		if(event.keyCode == 32) {
+		if(event.keyCode == 13) {
 			//setTimeout(500);
 			var data = $.trim($(this).val());
 			if (data != '') {

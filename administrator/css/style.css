@@ -131,6 +131,9 @@ input {
 	width: 100%;
 	padding: 10px 5px;
 }
+.block {
+	margin: 10px 0;
+}
 .has-border {
 	border: 1px solid #b8b8b8;
 }
@@ -157,6 +160,11 @@ span.required {
 }
 span.required:after {
 	content: " *";
+}
+span.close {
+	position: absolute;
+	top: 5px;
+	right: 5px;
 }
 /* Login */
 #login_wrapper {
@@ -265,6 +273,24 @@ span.required:after {
 #header .search_box {
 	margin-right: 30px;
 	margin-top: 3px;
+}
+#header .search_box .relative {
+	position: relative;
+}
+#header .search_box .relative .advanced_search {
+	width: 100%;
+	position: absolute;
+	background-color: #222222;
+	padding: 20px 0 10px;
+}
+#header .search_box .relative .advanced_search .div-title {
+	color: #f1f1f1;
+}
+#header .search_box .relative .advanced_search label {
+	color: #a1a1a1;
+}
+#header .search_box .relative .advanced_search label:hover {
+	color: #ffffff;
 }
 #body {
 	width: 100%;

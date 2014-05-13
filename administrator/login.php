@@ -1,7 +1,5 @@
 <?php session_start(); 
 include_once('functions.php');
-include_once('includes/users.php');
-include_once('includes/settings.php');
 
 $url = (isset($_GET['redirect_to'])) ? $_GET['redirect_to'] : 'index.php';
 /* Login */
@@ -49,6 +47,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'logout')
 					<p><input type="submit" value="Login"></p>
 				</form>
 				<p><a href="#">Forgot password?</a><?php if(getOption('anyone_can_register') == 1) { ?> | <a id="redirect_register" href="javascript:void(0);">Register</a><?php } ?></p>
+				<p style="margin-top: 20px;"><a href="<?php echo getOption('base_url') . '/map.php' ?>">Back to Map</a></p>
 			</div>
 		</div>
 		<div id="register_box" class="login_box hidden">

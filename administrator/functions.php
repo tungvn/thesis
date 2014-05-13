@@ -8,13 +8,15 @@ Order Role from Highest to Lowest
 					but can NOT create or remove ones
 	4. subscriber -- only view infomations, can NOT action with anything
 */
-// Include databases.php -- all functions to action with postgresql database
+
+// Include all functions to action with database
 require_once(dirname(__FILE__) . '/config.php');
 require_once(dirname(__FILE__) . '/includes/databases.php');
 require_once(dirname(__FILE__) . '/includes/settings.php');
 require_once(dirname(__FILE__) . '/includes/users.php');
+require_once(dirname(__FILE__) . '/includes/GeoserverWrapper.php');
 
-
+/* Check user permissions */
 function is_admin() {
 	@session_start();
 	if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == true) 
@@ -94,6 +96,19 @@ function getNumberObject($obj_type) {
 function getNumberUser() {
 	$selects = array('COUNT(*)');
 	$rows = getRecords(DBNAME, 'users', $selects);
+	if($rows === false) return false;
+
+	if (pg_num_rows($rows) == 1) {
+		$row = pg_fetch_array($rows);
+		return $row[0];
+	}
+
+	return false;
+}
+
+function getNumberSettings() {
+	$selects = array('COUNT(*)');
+	$rows = getRecords(DBNAME, 'settings', $selects);
 	if($rows === false) return false;
 
 	if (pg_num_rows($rows) == 1) {
@@ -471,7 +486,11 @@ if(isset($_POST['action']) && !empty($_POST['action'])) {
 		case 'submit_delete_object' : deleteObject($_POST['data']); break;
 		case 'delete_users' : deleteUsers($_POST['data']); break;
 		case 'change_role_users' : changeRole($_POST['data']); break;
-		case 'search_tool': preSearchTool($_POST['group'], $_POST['keyword']); break;
+		case 'search_tool':
+			if(isset($_POST['json']))
+				searchTools(json_decode($_POST['group'], true), $_POST['keyword']);
+			else preSearchTool($_POST['group'], $_POST['keyword']);
+			break;
 	}
 }
 /* For Ajax call */
@@ -676,7 +695,6 @@ function preSearchTool($datas, $keyword) {
 
 function searchTools($arrayLayers, $keyword) {
 	$result = array();
-
 	foreach ($arrayLayers as $workspace => $layers) {
 		foreach ($layers as $key => $layer) {
 			$rows = getFields($workspace, $layer);
@@ -694,7 +712,10 @@ function searchTools($arrayLayers, $keyword) {
 						$wheres .= "cast($column_name as text) LIKE '%$keyword%'";
 					}
 					else {
-						$select_more = ', ST_AsGeoJSON(geom) as latlng';
+						if(in_array($layer, array('thuyvan', 'lokhoan')))
+							$select_more = ', ST_AsText(ST_Transform(ST_SetSRID(geom,32648),4326)) as latlng';
+						else
+							$select_more = ', ST_AsGeoJSON(geom) as latlng';
 					}
 					$i++;
 				}
@@ -710,10 +731,78 @@ function searchTools($arrayLayers, $keyword) {
 		}
 	}
 	if(!empty($result)) {
-		print_r($result);
+		print_r($result);/*temp*/
 	}
 	else
 		echo 'I cannot fucking find anything you search, bitch!';
+}
+
+
+// function for push data from postgresql to geoserver
+function publish2Frontend($request, $data) {
+	$geoserver = new GeoserverWrapper('http://localhost:8080/geoserver', $_REQUEST['username'], $_REQUEST['password']);
+
+	switch ($request) {
+		case 'listworkspaces':
+			print_r($geoserver->listWorkspaces());
+			break;
+		case 'createworkspace':
+			print_r($geoserver->createWorkspace($_REQUEST['workspace']));
+			break;
+		case 'deleteworkspace':
+			print_r($geoserver->deleteWorkspace($_REQUEST['workspace']));
+			break;
+
+		case 'listdatastores':
+			print_r($geoserver->listDataStores($_REQUEST['workspace']));
+			break;
+		case 'createdatastore':
+			print_r($geoserver->createShpDirDataStore($_REQUEST['datastore'], $_REQUEST['workspace'], $_REQUEST['location']));
+			break;
+		case 'createdatastorepostgis':
+			print_r($geoserver->createPostGISDataStore($_REQUEST['datastore'], $_REQUEST['workspace'], $_REQUEST['dbname'], $_REQUEST['dbuser'], $_REQUEST['dbpass'], $_REQUEST['dbhost']));
+			break;
+		case 'deletedatastore':
+			print_r($geoserver->deleteDataStore($_REQUEST['datastore'], $_REQUEST['workspace']));
+			break;
+		
+		case 'listlayers':
+			print_r($geoserver->listLayers($_REQUEST['workspace'], $_REQUEST['datastore']));
+			break;
+		case 'createlayer':
+			print_r($geoserver->createLayer($_REQUEST['layer'], $_REQUEST['workspace'], $_REQUEST['datastore'], $_REQUEST['description']));
+			break;
+		case 'deletelayer':
+			print_r($geoserver->deleteLayer($_REQUEST['layer'], $_REQUEST['workspace'], $_REQUEST['datastore']));
+			break;
+		case 'viewlayer':
+			if ($_REQUEST['format'] == 'LEGEND') {
+				echo '<img alt="Embedded Image" src="data:image/png;base64,'.base64_encode($geoserver->viewLayerLegend($_REQUEST['layer'], $_REQUEST['workspace'])).'"/>';
+
+			} else {
+				print_r($geoserver->viewLayer($_REQUEST['layer'], $_REQUEST['workspace'], $_REQUEST['format']));
+			}
+			break;
+
+		case 'liststyles':
+			print_r($geoserver->listStyles());
+			break;
+		case 'createstyle':
+			print_r($geoserver->createStyle($_REQUEST['stylename'], $_REQUEST['sld']));
+			break;
+		case 'deletestyle':
+			print_r($geoserver->deleteStyle($_REQUEST['stylename']));
+			break;
+		case 'assignstyle':
+			print_r($geoserver->addStyleToLayer($_REQUEST['layer'], $_REQUEST['workspace'], $_REQUEST['stylename']));
+			break;
+
+		case 'wfs-t':
+			print_r($geoserver->executeWFSTransaction(stripslashes($_REQUEST['transaction'])));
+			break;
+	}
+
+	return;
 }
 
 ?>

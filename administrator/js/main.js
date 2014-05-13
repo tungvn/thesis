@@ -275,4 +275,70 @@ jQuery(document).ready(function($) {
 		});
 	//}
 	
+	// Search form
+	$('form.search_box').find('input#s').click(function(event) {
+		$('form.search_box').find('div.advanced_search').slideDown('fast', function() {
+			var advanced_search = $(this);
+			$(this).show();
+			$(this).find('span.close').click(function(event) {
+				advanced_search.slideUp('fast', function() {
+					$(this).hide();
+				})
+			});
+		});
+	});
+	// Search Tool Ajax
+	// Prevent submit event
+	$('form.search_box').submit(function(event) {
+		var data = $.trim($(this).val());
+		if (data != '') {
+			data = convertU2T(data);
+			var layers = getLayers2Search();
+			if(layers !== {}) {
+				var request = {
+					keyword: data,
+					group: layers,
+					action: 'search_tool'
+				}
+			}
+			else {
+				alert('You must choose layers to search!');
+			}
+		}
+	});
+
+	// Get group workspace and layers have been choosen
+	function getLayers2Search() {
+		var layers = new Array();
+
+		$('.workspace').has('input:checked').each(function() {
+			var wp = $(this).attr('for');
+			var layer = new Array();
+			$(this).find('input:checked').each(function() {
+				layer[layer.length] = $(this).val();
+			});
+			
+			layers.push({
+				workspace: wp,
+				layers: layer
+			});
+		});
+		return layers;
+	}
+
+	/* Handle changing font */
+	function convertU2T(xau) {
+		var srcid1 = "UNICODE";
+		var srcmap1 = initCharMap(srcid1);
+		var destmap1 = initCharMap(parseMapID("TCVN-3"));
+		var xau1 = srcmap1.convertTxtTo( xau, destmap1 )	;
+		return xau1;
+	}
+	function convertT2U(xau) {
+		var srcid1 = "TCVN-3";
+		var srcmap1 = initCharMap(srcid1);
+		var destmap1 = initCharMap(parseMapID("UNICODE"));
+		var xau1 = srcmap1.convertTxtTo( xau, destmap1 )	;
+		return xau1;
+	}
 });

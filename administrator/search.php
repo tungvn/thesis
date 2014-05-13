@@ -1,5 +1,5 @@
 <?php session_start(); 
-include_once('functions.php');?>
+require_once('functions.php');?>
 
 <!DOCTYPE html>
 <html>
@@ -96,7 +96,7 @@ include_once('functions.php');?>
 			</div>
 			<div class="main_body grid-4">
 				<div class="container">
-					<h2 class="div-title">Dashboard</h2>
+					<h2 class="div-title">Search Result</h2>
 					<div id="notification" class="grid-4">
 						<div class="container">
 							<span class="info fl hidden"></span>
@@ -105,76 +105,72 @@ include_once('functions.php');?>
 							<p><?php echo @$_POST['notification']; ?></p>
 						</div>
 					</div>
-					<!-- dashboard -->
-					<div class="grid-1 block">
-						<div class="container has-border has-border-radius">
-							<h3 class="div-title">Workspace</h3>
-							<div class="the-content fl">
-								<p>
-									We have <a href="edit.php?obj=workspace"><?php echo getNumberObject('workspace'); ?></a> workspace(s). 
-									<?php if(is_admin() || is_moder()): ?>
-									<a class="button has-border-radius" href="edit.php?obj=workspace">Add New Workspace</a>
-									<?php endif; ?>
-								</p>
-							</div>
-						</div>
+					<!-- search result -->
+					<?php $check = 0;
+					$keyword = '';
+					$data = array();
+					$wp = array();
+					if(isset($_POST['submit'])) {
+						while (list($name, $value) = each($_POST)) {
+							if($name == 's') $keyword = $value;
+							$layers = array();
+							if(strpos($name, 'layer') !== false) {
+								$temp_wp_name = substr($value, 0, strpos($value, ':'));
+								$temp_layer_name = substr($value, strpos($value, ':')+1);
+								if(empty($wp) || !in_array($temp_wp_name, $wp)) {
+									array_push($wp, $temp_wp_name);
+									$data[$temp_wp_name] = array();
+								}
+								array_push($data[$temp_wp_name], $temp_layer_name);
+							}
+						}
+						unset($wp);
+						$check = 1;
+						searchTools($data, $keyword);
+					} ?>
+					<div class="search_result">
 					</div>
-					<div class="grid-1 block">
-						<div class="container has-border has-border-radius">
-							<h3 class="div-title">Layers</h3>
-							<div class="the-content fl">
-								<p>We have <a href="edit.php?obj=layer"><?php echo getNumberObject('layer'); ?></a> layer(s). 
-									<?php if(is_admin() || is_moder()): ?>
-									<a class="button has-border-radius" href="edit.php?obj=layer">Add New Layer</a>
-									<?php endif; ?>
-								</p>
-							</div>
-						</div>
-					</div>
-					<div class="grid-1 block">
-						<div class="container has-border has-border-radius">
-							<h3 class="div-title">User</h3>
-							<div class="the-content fl">
-								<p>We have <?php if(is_subscriber()) echo getNumberUser(); else { ?>
-									<a href="edit.php?obj=users"><?php echo getNumberUser(); ?></a>
-									<?php } 
-									echo ' user(s).';
-									if(is_admin()): ?>
-									<a class="button has-border-radius" href="edit.php?obj=users">View User</a>
-									<?php endif; ?>
-								</p>
-							</div>
-						</div>
-					</div>
-					<div class="grid-1 block">
-						<div class="container has-border has-border-radius">
-							<h3 class="div-title">Settings</h3>
-							<div class="the-content fl">
-								<p>We have <?php if(is_subscriber()) echo getNumberSettings(); else { ?>
-									<a href="settings.php"><?php echo getNumberSettings(); ?></a>
-									<?php } 
-									echo ' setting(s).';
-									if(is_admin() || is_moder() || is_editor()): ?>
-									<a class="button has-border-radius" href="settings.php">View Settings</a>
-									<?php endif; ?>
-								</p>
-							</div>
-						</div>
-					</div>
-					<?php if(is_admin() || is_moder()): ?>
-					<div class="grid-3 block">
-						<div class="container has-border has-border-radius">
-							<h3 class="div-title">Logs</h3>
-							<div class="the-content fl">
-								
-							</div>
-						</div>
-					</div>
-					<?php endif; ?>
 				</div>
 			</div>
 		</div>
 	</div>
 	<?php endif; ?>
 </body>
+<script>
+/*function convertT2U(xau) {
+	var srcid1 = "TCVN-3";
+	var srcmap1 = initCharMap(srcid1);
+	var destmap1 = initCharMap(parseMapID("UNICODE"));
+	var xau1 = srcmap1.convertTxtTo( xau, destmap1 )	;
+	return xau1;
+}
+function convertU2T(xau) {
+	var srcid1 = "UNICODE";
+	var srcmap1 = initCharMap(srcid1);
+	var destmap1 = initCharMap(parseMapID("TCVN-3"));
+	var xau1 = srcmap1.convertTxtTo( xau, destmap1 )	;
+	return xau1;
+}
+if(<?php echo $check; ?> == 1) {
+	var request = {
+		keyword: convertU2T('<?php echo $keyword ?>'),
+		group: '<?php echo json_encode($data); ?>',
+		action: 'complete_search_tool',
+		json: true
+	}
+	$.ajax({
+		type: 'POST',
+		data: request
+	})
+	.done(function(response) {
+		$('#body .container .search_result').html(response);
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+		console.log("complete");
+	});
+}*/
+</script>
 </html>
