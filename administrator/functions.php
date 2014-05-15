@@ -734,30 +734,18 @@ function searchTools($arrayLayers, $keyword) {
 		//print_r($result);/*temp*/
 		foreach ($result as $key => $value) {
 			
-			$latlng = $value['latlng'];			
-				if ( strpos($latlng, ','))
-				{
-					//print_r( substr($latlng, strpos($latlng, ' '),           strpos($latlng, ',')  -   strpos($latlng, ' ')   )                       );
-					$latlng = substr( $latlng, 0, strpos($latlng, ',')+1)					;
-					print_r($latlng.'<br>');
-					$lat  =  	substr($latlng, strrpos($latlng, '(') +1,  strpos($latlng,' ')- strrpos($latlng, '(')    );
-					$lng=  substr($latlng, strpos($latlng, ' '),           strpos($latlng, ',')  -   strpos($latlng, ' ')   ); 
+			$latlng = $value['latlng'];
+				if (strpos($latlng, ',')) {
+					$latlng = substr( $latlng, 0, strpos($latlng, ',')+1);
+					$lat = substr($latlng, strrpos($latlng, '(') +1, strpos($latlng,' ') - strrpos($latlng, '('));
+					$lng = substr($latlng, strpos($latlng, ' '), strpos($latlng, ',') - strpos($latlng, ' ')); 
 					//print_r('expression');
 				}
-				else
-					{
-						//print_r(  substr($latlng, strpos($latlng, ' '),          strpos($latlng, ')') -  strpos($latlng, ' ')));
-						print_r($latlng.'<br>');
-						$lat  =  	substr($latlng, strrpos($latlng, '(') +1,  strpos($latlng,' ')- strrpos($latlng, '(')    );
-						$lng = substr($latlng, strpos($latlng, ' '),          strpos($latlng, ')') -  strpos($latlng, ' '));
-					}
-				print_r('lat =  '.$lat.'<br>')	;
-				print_r('lng =  '.$lng.'<br>');
-				print('<br>');
-		//Bac show button click nhe, lat lng co gia tri roi.		
-
-
-
+				else {
+					$lat =  	substr($latlng, strrpos($latlng, '(') +1,  strpos($latlng,' ')- strrpos($latlng, '(')    );
+					$lng = substr($latlng, strpos($latlng, ' '),          strpos($latlng, ')') -  strpos($latlng, ' '));
+				}
+				echo '<a class="search_result" href="javascript:void(0);" lat="' . $lat . '" lng="' . $lng . '" onclick="showResult(' . $lat . ', ' . $lng . ');">Result ' . $key . '</a><br>';
 		}
 
 

@@ -258,6 +258,10 @@ span.required:after {
 .map_option_block #map_info p {
 	color: #111111;
 }
+#content .left_col .map_option_block .search-result {
+	max-height: 300px;
+	overflow-y: scroll;
+}
 #content .left_col .map_option_block .search-result,
 #content .left_col .map_option_block .search-result li {
 	float: left;

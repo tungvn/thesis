@@ -130,4 +130,9 @@ jQuery(document).ready(function() {
 		return layers;
 	}
 	
+	
 });
+// Get latlng to show map from search
+function showResult(lat, lng) {
+	cur_map.setCenter(new OpenLayers.LonLat(lat, lng), 4);
+}
