@@ -715,7 +715,7 @@ function searchTools($arrayLayers, $keyword) {
 						if(in_array($layer, array('thuyvan', 'lokhoan')))
 							$select_more = ', ST_AsText(ST_Transform(ST_SetSRID(geom,32648),4326)) as latlng';
 						else
-							$select_more = ', ST_AsGeoJSON(geom) as latlng';
+							$select_more = ', ST_AsText(geom) as latlng';
 					}
 					$i++;
 				}
@@ -731,7 +731,37 @@ function searchTools($arrayLayers, $keyword) {
 		}
 	}
 	if(!empty($result)) {
-		print_r($result);/*temp*/
+		//print_r($result);/*temp*/
+		foreach ($result as $key => $value) {
+			
+			$latlng = $value['latlng'];			
+				if ( strpos($latlng, ','))
+				{
+					//print_r( substr($latlng, strpos($latlng, ' '),           strpos($latlng, ',')  -   strpos($latlng, ' ')   )                       );
+					$latlng = substr( $latlng, 0, strpos($latlng, ',')+1)					;
+					print_r($latlng.'<br>');
+					$lat  =  	substr($latlng, strrpos($latlng, '(') +1,  strpos($latlng,' ')- strrpos($latlng, '(')    );
+					$lng=  substr($latlng, strpos($latlng, ' '),           strpos($latlng, ',')  -   strpos($latlng, ' ')   ); 
+					//print_r('expression');
+				}
+				else
+					{
+						//print_r(  substr($latlng, strpos($latlng, ' '),          strpos($latlng, ')') -  strpos($latlng, ' ')));
+						print_r($latlng.'<br>');
+						$lat  =  	substr($latlng, strrpos($latlng, '(') +1,  strpos($latlng,' ')- strrpos($latlng, '(')    );
+						$lng = substr($latlng, strpos($latlng, ' '),          strpos($latlng, ')') -  strpos($latlng, ' '));
+					}
+				print_r('lat =  '.$lat.'<br>')	;
+				print_r('lng =  '.$lng.'<br>');
+				print('<br>');
+		//Bac show button click nhe, lat lng co gia tri roi.		
+
+
+
+		}
+
+
+
 	}
 	else
 		echo 'I cannot fucking find anything you search, bitch!';
