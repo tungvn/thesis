@@ -5,8 +5,12 @@ jQuery(document).ready(function($) {
 
 	// Set map height = windows height 
 	function setLeftMenuHeight() {
-		var window_height = $('#body .main_body').height();
-		$('#body .left_menu').css({'height': (window_height+100)+'px'});
+		var window_height = $('#body .main_body').height() + 100;
+		var left_menu = $('#body .left_menu').height();
+		if(left_menu > window_height)
+			$('#body .main_body').height(left_menu);
+		else 
+			$('#body .left_menu').height(window_height);
 	}
 
 	// Window resize
@@ -341,4 +345,48 @@ jQuery(document).ready(function($) {
 		var xau1 = srcmap1.convertTxtTo( xau, destmap1 )	;
 		return xau1;
 	}
+
+	$('body').find('.tab-title').click(function(event) {
+		var show = $(this).attr('for');
+
+		$('body').find('.tab-title').each(function() {
+			$(this).removeClass('tab-on');
+		});
+		if(show != 'view_map')
+			$('body').find('.tab-title[for="view_map"]').addClass('hidden');
+
+		$(this).addClass('tab-on');
+
+		$('body').find('.tab-content').each(function() {
+			$(this).removeClass('tab-show');
+		});
+		$('body').find('.tab-content').each(function() {
+			if($(this).attr('for') == show) {
+				$(this).addClass('tab-show');
+			}
+		});
+	});
 });
+
+// Show map in single.php
+function showResult(wp, layer, lat, lng) {
+	$('body').find('.tab-title').each(function() {
+		if($(this).attr('for') != 'view_map')
+			$(this).removeClass('tab-on');
+		else {
+			$(this).removeClass('hidden');
+			$(this).addClass('tab-on');
+		}
+
+		$('body').find('.tab-content').each(function() {
+			if($(this).attr('for') == 'view_map')
+				$(this).addClass('tab-show');
+			else
+				$(this).removeClass('tab-show');
+		});
+	});
+	var layers = new Array(wp + ':' + layer);
+
+	layerInput(layers, lat, lng);
+	
+}

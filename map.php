@@ -90,6 +90,13 @@
 				<p class="footer">&copy; Copyright by TungVN 2014</p>
 			</div>
 			<div class="main_col fl">
+				<ul class="map_bar">
+					<li><span class="icon-map_bar distance" for="distance"></span></li>
+					<li><span class="icon-map_bar area" for="area"></span></li>
+					<li><span class="icon-map_bar polygon" for="polygon"></span></li>
+					<li><span class="icon-map_bar"></span></li>
+					<li><span class="icon-map_bar"></span></li>
+				</ul>
 				<div id="map">
 				</div>
 				<!-- show map -->

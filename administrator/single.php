@@ -15,6 +15,11 @@ include_once('includes/settings.php');?>
 	<script src="js/vumods.js" type='text/javascript'></script>
 	<script src="js/vumaps.js" type='text/javascript'></script>
 	<script src="js/vumaps2.js" type='text/javascript'></script>
+	<?php if(isset($_GET['obj']) && $_GET['obj'] == 'layer'): ?>
+	<script src="js/OpenLayers.js"></script>
+	<script src="js/base.js"></script>
+	<script src="js/layer.js"></script>
+	<?php endif; ?>
 	<script src="js/main.js"></script>
 </head>
 <body>
@@ -23,6 +28,29 @@ include_once('includes/settings.php');?>
 		header('Location: login.php?redirect_to=' . $link); ?>
 	<?php else: 
 	if(isset($_POST['submit'])) {
+		$obj_type = $_POST['object'];
+		$obj = $_POST[$obj_type];
+		$sets_info = array(
+			'name' => $_POST[$obj_type . 'name'],
+			'publish' => $_POST[$obj_type . 'publish'],
+			'description' => $_POST[$obj_type . 'desc']
+		);
+		$wheres_info = array('slug' => $_POST[$obj_type . 'slug']);
+
+		$set_records = array();
+		if($obj_type == 'layer') {
+			$sets_info['workspace'] = $_POST[$obj_type . 'workspace'];
+			$records = $_POST['record'];
+			foreach ($records as $key => $record) {
+				foreach ($record as $column_name => $value) {
+					if($column_name == 'gid') {
+						$wheres = array('gid' => $value);
+						$result_update_record = updateRecords($_POST['workspace'], $obj, $record, $wheres);
+					}
+				}
+			}
+		}
+		$result_change_info = updateRecords('fimo', 'object', $sets_info, $wheres_info);
 
 	} ?>
 	<div id="wrapper">
@@ -33,8 +61,6 @@ include_once('includes/settings.php');?>
 			<ul class="top_menu fl">
 				<li><a href="<?php echo getOption('administrator_url'); ?>">Home</a></li>
 				<li><a href="<?php echo getOption('base_url'). '/map.php'; ?>">Visit Map</a></li>
-				<!-- <li><a href="#">Option 1</a></li>
-				<li><a href="#">Option 2</a></li> -->
 			</ul>
 			<div class="user_menu fr">
 				<a href="#"><?php echo getCurrentUserID(); ?></a>
@@ -48,7 +74,7 @@ include_once('includes/settings.php');?>
 						$wheres = array('type' => 'workspace');
 						$wps = getRecords(DBNAME, 'object', $selects, $wheres);
 
-						if($wps && pg_num_rows($wps) > 0) { 
+						if($wps && pg_num_rows($wps) > 0) {
 							echo '<h3 class="div-title">Choose Layers to Search</h3>';
 							while($wp = pg_fetch_array($wps)) {
 								$num = 0;

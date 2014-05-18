@@ -266,7 +266,6 @@ function updateRecords($namedb, $nametb, $sets, $wheres) {
 			$st .= ', ';
 		$i++;
 		$st .= "$key = '$set' ";
-
 	}
 
 	$whe = '';

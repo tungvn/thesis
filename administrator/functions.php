@@ -118,6 +118,33 @@ function getNumberSettings() {
 
 	return false;
 }
+
+function getObjectID($slug) {
+	$selects = array('id');
+	$wheres = array('slug' => $slug);
+	$rows = getRecords(DBNAME, 'object', $selects, $wheres);
+	if($rows === false) return false;
+
+	if (pg_num_rows($rows) == 1) {
+		$row = pg_fetch_array($rows);
+		return $row['id'];
+	}
+
+	return false;
+}
+function getObjectSlug($id) {
+	$selects = array('slug');
+	$wheres = array('id' => $id);
+	$rows = getRecords(DBNAME, 'object', $selects, $wheres);
+	if($rows === false) return false;
+
+	if (pg_num_rows($rows) == 1) {
+		$row = pg_fetch_array($rows);
+		return $row['slug'];
+	}
+
+	return false;
+}
 /*-------------------------------------edit.php-------------------------------------------------*/
 /* Edit administrator */
 function addNewForm($obj_type) { ?>
@@ -389,14 +416,16 @@ function single($obj_type, $obj) {
 		echo '<p>Access denied</p>';
 }
 
-function singleObject($obj_type, $obj) { 
-	$selects = array('*');
+function singleObject($obj_type, $obj) { ?>
+<form id="update_object" class="grid-4 fl" method="POST">
+	<input type="hidden" name="object" value="<?php echo $obj_type; ?>">
+	<input type="hidden" name="<?php echo $obj_type; ?>" value="<?php echo getObjectSlug($obj); ?>">
+	<?php $selects = array('*');
 	$wheres = array('id' => $obj);
 	$rows = getRecords(DBNAME, 'object', $selects, $wheres);
 	if($rows && pg_num_rows($rows) == 1):
 		$row = pg_fetch_array($rows);
 	if($obj_type == 'workspace'): ?>
-	<form id="update_object" class="grid-4 fl" method="POST">
 		<div class="row">
 			<div class="grid-1-4">
 				<label for="<?php echo $obj_type . 'name'; ?>">Name</label>
@@ -420,7 +449,7 @@ function singleObject($obj_type, $obj) {
 				<label for="<?php echo $obj_type . 'publish'; ?>">Publish</label>
 			</div>
 			<div class="grid-3">
-				<?php $selected = (!$row['publish']) ? 'selected' : ''; ?>
+				<?php $selected = ($row['publish'] == 'f') ? 'selected' : ''; ?>
 				<select class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'publish'; ?>" id="<?php echo $obj_type . 'publish'; ?>">
 					<option value="1">Publish</option>
 					<option value="0" <?php echo $selected; ?>>Unpublish</option>
@@ -443,7 +472,7 @@ function singleObject($obj_type, $obj) {
 		if($rows_inner && pg_num_rows($rows_inner) > 0): $i = 0; ?>
 		<div class="row">
 			<div class="grid-1-4">
-				<p>Layers of "<?php echo ucfirst($row['name']); ?>"</p>
+				<label>Layers of "<?php echo ucfirst($row['name']); ?>"</label>
 			</div>
 			<div class="grid-3">
 				<p>
@@ -457,17 +486,139 @@ function singleObject($obj_type, $obj) {
 		</div>
 		<?php endif; ?>
 	<?php else: ?>
-	<form id="update_object" class="grid-4 fl" method="POST">
-		<div class="row">
-			<div class="grid-1">
-				<div class="grid-4">
-						
+	<input type="hidden" name="workspace" value="<?php echo getObjectSlug($row['workspace']); ?>">
+		<ul class="tab-title-block grid-4">
+			<li class="tab-title tab-on" for="info">Layer Info</li>
+			<li class="tab-title" for="records">Records</li>
+			<li class="tab-title hidden" for="view_map">View Map</li>
+		</ul>
+		<div class="tab-content tab-show" for="info">
+			<div class="row">
+				<div class="grid-1-4">
+					<label for="<?php echo $obj_type . 'name'; ?>">Name</label>
+				</div>
+				<div class="grid-3">
+					<input type="text" class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'name'; ?>" id="<?php echo $obj_type . 'name'; ?>" value="<?php echo $row['name']; ?>">
+					<p class="grid-4"><i>Name of Layer</i></p>
 				</div>
 			</div>
-			<div id="map" class="grid-3"></div>
+			<div class="row">
+				<div class="grid-1-4">
+					<label for="<?php echo $obj_type . 'slug'; ?>">Slug</label>
+				</div>
+				<div class="grid-3">
+					<input type="text" class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'slug'; ?>" id="<?php echo $obj_type . 'slug'; ?>" value="<?php echo $row['slug']; ?>" readonly>
+					<p class="grid-4"><i>Slug of Layer</i></p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="grid-1-4">
+					<label for="<?php echo $obj_type . 'workspace'; ?>">Workspace</label>
+				</div>
+				<div class="grid-3">
+					<select name="<?php echo $obj_type . 'workspace'; ?>" id="<?php echo $obj_type . 'workspace'; ?>" class="has-border has-border-radius grid-3">
+						<?php $rows_inner = getObjects('workspace'); 
+						if($rows_inner):
+							$i = 0;
+							while ($row_inner = pg_fetch_array($rows_inner)): 
+								$selected = ($row_inner['id'] == $row['workspace']) ? 'selected' : ''; ?>
+								<option value="<?php echo $row_inner['id']; ?>" <?php echo $selected; ?>><?php echo $row_inner['name']; ?></option>
+						<?php endwhile; endif; ?>
+					</select>
+					<p class="grid-4"><i>Workspace</i></p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="grid-1-4">
+					<label for="<?php echo $obj_type . 'publish'; ?>">Publish</label>
+				</div>
+				<div class="grid-3">
+					<?php $selected = ($row['publish'] == 'f') ? 'selected' : ''; ?>
+					<select class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'publish'; ?>" id="<?php echo $obj_type . 'publish'; ?>">
+						<option value="1">Publish</option>
+						<option value="0" <?php echo $selected; ?>>Unpublish</option>
+					</select>
+					<p class="grid-4"><i>Publish or Unpublish Layer</i></p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="grid-1-4">
+					<label for="<?php echo $obj_type . 'description'; ?>">Description</label>
+				</div>
+				<div class="grid-3">
+					<textarea class="has-border has-border-radius grid-3" name="<?php echo $obj_type . 'desc'; ?>" id="<?php echo $obj_type . 'description'; ?>" rows="10"><?php echo $row['description']; ?></textarea>
+					<p class="grid-4"><i>Description of Layer</i></p>
+				</div>
+			</div>
+		</div>
+		<div class="tab-content" for="records">
+			<div class="container" style="max-height: 600px; overflow-y: scroll;">
+				<p class="div-title"><i>Click cell to edit</i></p>
+				<table class="grid-4">
+					<thead>
+						<tr>
+						<?php $fields = getFields(getObjectSlug($row['workspace']), $row['slug']); 
+						if($fields) {
+							$num_fields = sizeof($fields) + 1;
+							foreach ($fields as $column_name => $data_type) { ?>
+							<td class="has-border" style="width: <?php echo 95/$num_fields; ?>%; padding: 10px 0; text-align: center;"><?php echo $column_name; ?></td>
+							<?php }
+						} ?>
+							<td style="width: 5%;">&nbsp;</td>
+						</tr>
+					</thead>
+					<tbody>
+						<?php $records = getRecords(getObjectSlug($row['workspace']), $row['slug']);
+						if($records && pg_num_rows($records)):
+							$record_key = 0;
+							while($record = pg_fetch_array($records)): ?>
+						<tr>
+							<?php foreach ($fields as $column_name => $data_type) {
+							if($column_name == 'geom') {
+								$link = connectDB(HOST, getObjectSlug($row['workspace']), DBUSER, DBPASS);
+								if(in_array($row['slug'], array('thuyvan', 'lokhoan')))
+									$latlng = pg_query('SELECT ST_AsText(ST_Transform(ST_SetSRID(geom,32648),4326)) as latlng FROM ' . $row['slug'] . ' WHERE gid = ' . $record['gid']);
+								else
+									$latlng = pg_query('SELECT ST_AsText(geom) as latlng FROM ' . $row['slug'] . ' WHERE gid = ' . $record['gid']);
+								if($latlng && pg_num_rows($latlng) > 0) {
+									$latlng = pg_fetch_array($latlng);
+									$latlng = $latlng['latlng'];
+									if (strpos($latlng, ',')) {
+										$latlng = substr( $latlng, 0, strpos($latlng, ',')+1);
+										$lat = substr($latlng, strrpos($latlng, '(')+1, strpos($latlng, ' ') - strrpos($latlng, '('));
+										$lng = substr($latlng, strpos($latlng, ' '), strpos($latlng, ',') - strpos($latlng, ' ')); 
+									}
+									else {
+										$lat = substr($latlng, strrpos($latlng, '(')+1, strpos($latlng, ' ') - strrpos($latlng, '('));
+										$lng = substr($latlng, strpos($latlng, ' '), strpos($latlng, ')') - strpos($latlng, ' '));
+									}
+								}
+								closeDB($link);
+							} ?>
+								<td class="has-border" style="text-align: center;">
+								<?php if($column_name == 'gid'): ?>
+									<p class="grid-4" style="padding: 10px;"><?php echo $record[$column_name]; ?></p>
+									<input type="hidden" name="record[<?php echo $record_key; ?>][<?php echo $column_name; ?>]" value="<?php echo $record[$column_name]; ?>">
+								<?php else: ?>
+									<input class="grid-4" style="padding: 10px;" type="text" name="record[<?php echo $record_key; ?>][<?php echo $column_name; ?>]" value="<?php echo $record[$column_name]; ?>">
+								<?php endif; ?>
+								</td>
+							<?php } $record_key++; ?>
+							<td class="has-border" style="text-align: center;">
+								<a href="javascript:void(0);" onclick="showResult(<?php echo '\'' . getObjectSlug($row['workspace']) . '\', \'' . $row['slug'] . '\', ' . $lat . ', ' . $lng; ?>);">View</a>
+							</td>
+						</tr>
+						<?php endwhile; endif; ?>
+					</tbody>
+				</table>
+			
+			</div>
+		</div>
+		<div class="tab-content" for="view_map">
+			<div id="map"></div>
 		</div>
 	<?php endif; ?>
-	<div class="row">
+	<div class="row" style="margin-top: 20px;">
 		<div class="grid-4 fl">
 			<input name="submit" type="submit" class="button has-border-radius" value="Update">
 		</div>
@@ -509,6 +660,9 @@ function addNewObject($data) {
 				);
 				$result_2 = insertRecords(DBNAME, 'object', $args);
 				if($result_2) {
+					$push = array('workspace' => $data['slug'], 'datastore' => $data['slug']);
+					publish2Frontend('createworkspace', $push);
+					publish2Frontend('createdatastorepostgis', $push);
 					echo 'success';
 				}
 				else echo 'fail_insert_tb';
@@ -525,7 +679,7 @@ function addNewObject($data) {
 			$wp_slug = pg_fetch_array($wp_slugs);
 		$wp_slug = $wp_slug['slug'];
 
-		$shp2pgsql = '"C:/Program Files/PostgreSQL/9.3/bin/shp2pgsql" -s 32448 -W LATIN1 -c -D -I '; 
+		$shp2pgsql = '"C:/Program Files/PostgreSQL/9.3/bin/shp2pgsql" -s 32648 -W LATIN1 -c -D -I '; 
 		$psql = '"C:/Program Files/PostgreSQL/9.3/bin/psql" -d ' . $wp_slug . ' -U postgres ';
 		$result = exec($shp2pgsql . $data['shpfile'] . " | " . $psql);
 
@@ -540,6 +694,13 @@ function addNewObject($data) {
 			);
 			$result_2 = insertRecords(DBNAME, 'object', $args);
 			if($result_2) {
+				$push = array(
+					'layer' => vn_str_filter($data['name']),
+					'workspace' => getObjectSlug($data['workspace']),
+					'datastore' => getObjectSlug($data['workspace']),
+					'description' => $data['description']
+				);
+				publish2Frontend('createlayer', $push);
 				echo 'success';
 			}
 			else echo 'fail_insert_tb';
@@ -583,14 +744,27 @@ function deleteObject($datas) {
 		if($result_del_obj) {
 			if($obj_type == 'workspace') {
 				$result_del_db = dropDB($slug);
-				if($result_del_db)
-					$check = 'success';
+				if($result_del_db) {
+					$wheres = array('workspace' => $ids[$i]);
+					$result_del_layer = dropRecords(DBNAME, 'object', $wheres);
+					if($result_del_layer) {
+// temp
+						// publish2Frontend('deleteworkspace');
+						$check = 'success';
+					}
+					else $check = 'fail_del_layer_inline';
+				}
 				else {
 					$check = 'fail_del_db';
 					break;
 				}
 			}
-			else $check = 'success';
+			else {
+				// temp
+				$push = array();
+				// publish2Frontend('deletelayer', )
+				$check = 'success';
+			}
 		}
 		else {
 			$check = 'fail_del_obj';
@@ -687,14 +861,15 @@ function preSearchTool($datas, $keyword) {
 		foreach ($data['layers'] as $temp_arrLayer) {
 			array_push($temp_arrLayers, substr($temp_arrLayer, strpos($temp_arrLayer, ':')+1));
 		}
-		
 		$arrayLayers[$data['workspace']] = $temp_arrLayers;
 	}
-	searchTools($arrayLayers, $keyword);
+
+	searchTools($arrayLayers, $keyword, true);
 }
 
-function searchTools($arrayLayers, $keyword) {
+function searchTools($arrayLayers, $keyword, $front_end = false) {
 	$result = array();
+	$key_number = 1;
 	foreach ($arrayLayers as $workspace => $layers) {
 		foreach ($layers as $key => $layer) {
 			$rows = getFields($workspace, $layer);
@@ -724,99 +899,54 @@ function searchTools($arrayLayers, $keyword) {
 
 				if($rows && pg_num_rows($rows) > 0) {
 					while($row = pg_fetch_array($rows)) {
-						array_push($result, $row);
+						// array_push($result, $row);
+						$latlng = $row['latlng'];
+						if (strpos($latlng, ',')) {
+							$latlng = substr( $latlng, 0, strpos($latlng, ',')+1);
+							$lat = substr($latlng, strrpos($latlng, '(')+1, strpos($latlng, ' ') - strrpos($latlng, '('));
+							$lng = substr($latlng, strpos($latlng, ' '), strpos($latlng, ',') - strpos($latlng, ' ')); 
+						}
+						else {
+							$lat = substr($latlng, strrpos($latlng, '(')+1, strpos($latlng, ' ') - strrpos($latlng, '('));
+							$lng = substr($latlng, strpos($latlng, ' '), strpos($latlng, ')') - strpos($latlng, ' '));
+						}
+						if($front_end)
+							echo '<a class="search_result" href="javascript:void(0);" onclick="showResult(' . $lat . ', ' . $lng . ');">' . $workspace . ' => ' . $layer . ' (Result ' . $key_number++ . ')</a><br>';
+						else {
+							foreach ($row as $name => $val) {
+								echo '<a href="single.php?obj=layer&layer=' . getObjectID($layer) . ' " class="search_result">' . $workspace . ' => ' . $layer . ' (Result ' . $key_number++ . ')</a><br>';
+							}
+						}
 					}
 				}
 			}
 		}
 	}
-	if(!empty($result)) {
-		//print_r($result);/*temp*/
-		foreach ($result as $key => $value) {
-			
-			$latlng = $value['latlng'];
-				if (strpos($latlng, ',')) {
-					$latlng = substr( $latlng, 0, strpos($latlng, ',')+1);
-					$lat = substr($latlng, strrpos($latlng, '(') +1, strpos($latlng,' ') - strrpos($latlng, '('));
-					$lng = substr($latlng, strpos($latlng, ' '), strpos($latlng, ',') - strpos($latlng, ' ')); 
-					//print_r('expression');
-				}
-				else {
-					$lat =  	substr($latlng, strrpos($latlng, '(') +1,  strpos($latlng,' ')- strrpos($latlng, '(')    );
-					$lng = substr($latlng, strpos($latlng, ' '),          strpos($latlng, ')') -  strpos($latlng, ' '));
-				}
-				echo '<a class="search_result" href="javascript:void(0);" lat="' . $lat . '" lng="' . $lng . '" onclick="showResult(' . $lat . ', ' . $lng . ');">Result ' . $key . '</a><br>';
-		}
-
-
-
-	}
-	else
-		echo 'I cannot fucking find anything you search, bitch!';
 }
 
-
 // function for push data from postgresql to geoserver
+// Workspace' name is Datastore' name
 function publish2Frontend($request, $data) {
-	$geoserver = new GeoserverWrapper('http://localhost:8080/geoserver', $_REQUEST['username'], $_REQUEST['password']);
+	$geoserver = new GeoserverWrapper('http://localhost:8080/geoserver', 'admin', 'geoserver');
 
 	switch ($request) {
-		case 'listworkspaces':
-			print_r($geoserver->listWorkspaces());
-			break;
 		case 'createworkspace':
-			print_r($geoserver->createWorkspace($_REQUEST['workspace']));
+			$geoserver->createWorkspace($data['workspace']);
 			break;
 		case 'deleteworkspace':
-			print_r($geoserver->deleteWorkspace($_REQUEST['workspace']));
-			break;
-
-		case 'listdatastores':
-			print_r($geoserver->listDataStores($_REQUEST['workspace']));
-			break;
-		case 'createdatastore':
-			print_r($geoserver->createShpDirDataStore($_REQUEST['datastore'], $_REQUEST['workspace'], $_REQUEST['location']));
+			$geoserver->deleteWorkspace($data['workspace']);
 			break;
 		case 'createdatastorepostgis':
-			print_r($geoserver->createPostGISDataStore($_REQUEST['datastore'], $_REQUEST['workspace'], $_REQUEST['dbname'], $_REQUEST['dbuser'], $_REQUEST['dbpass'], $_REQUEST['dbhost']));
+			$geoserver->createPostGISDataStore($data['datastore'], $data['workspace'], $data['dbname'], DBUSER, DBPASS, HOST);
 			break;
 		case 'deletedatastore':
-			print_r($geoserver->deleteDataStore($_REQUEST['datastore'], $_REQUEST['workspace']));
-			break;
-		
-		case 'listlayers':
-			print_r($geoserver->listLayers($_REQUEST['workspace'], $_REQUEST['datastore']));
+			$geoserver->deleteDataStore($data['datastore'], $data['workspace']);
 			break;
 		case 'createlayer':
-			print_r($geoserver->createLayer($_REQUEST['layer'], $_REQUEST['workspace'], $_REQUEST['datastore'], $_REQUEST['description']));
+			$geoserver->createLayer($data['layer'], $data['workspace'], $data['datastore'], $data['description']);
 			break;
 		case 'deletelayer':
-			print_r($geoserver->deleteLayer($_REQUEST['layer'], $_REQUEST['workspace'], $_REQUEST['datastore']));
-			break;
-		case 'viewlayer':
-			if ($_REQUEST['format'] == 'LEGEND') {
-				echo '<img alt="Embedded Image" src="data:image/png;base64,'.base64_encode($geoserver->viewLayerLegend($_REQUEST['layer'], $_REQUEST['workspace'])).'"/>';
-
-			} else {
-				print_r($geoserver->viewLayer($_REQUEST['layer'], $_REQUEST['workspace'], $_REQUEST['format']));
-			}
-			break;
-
-		case 'liststyles':
-			print_r($geoserver->listStyles());
-			break;
-		case 'createstyle':
-			print_r($geoserver->createStyle($_REQUEST['stylename'], $_REQUEST['sld']));
-			break;
-		case 'deletestyle':
-			print_r($geoserver->deleteStyle($_REQUEST['stylename']));
-			break;
-		case 'assignstyle':
-			print_r($geoserver->addStyleToLayer($_REQUEST['layer'], $_REQUEST['workspace'], $_REQUEST['stylename']));
-			break;
-
-		case 'wfs-t':
-			print_r($geoserver->executeWFSTransaction(stripslashes($_REQUEST['transaction'])));
+			$geoserver->deleteLayer($data['layer'], $data['workspace'], $data['datastore']);
 			break;
 	}
 

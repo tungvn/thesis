@@ -356,3 +356,30 @@ table.featureInfo td {
 	text-align: center;
 	font-size: 13px !important;
 }
+/* ---------- */
+.map_bar {
+	float: left;
+	width: 100%;
+	border-bottom: 1px solid #b8b8b8;
+}
+.map_bar li {
+	float: left;
+	min-height: 30px;
+}
+.map_bar li span.icon-map_bar {
+	float: left;
+	width: 24px;
+	height: 22px;
+	margin: 4px 10px;
+	cursor: pointer;
+	cursor: hand;
+}
+.map_bar li span.icon-map_bar.distance {
+	background: url(../js/theme/default/img/ruler.png) top left no-repeat;
+}
+.map_bar li span.icon-map_bar.area {
+	background: url(../js/theme/default/img/draw_polygon_off.png) top left no-repeat;
+}
+.map_bar li span.icon-map_bar.polygon {
+	background: url(../js/theme/default/img/draw_line_off.png) top left no-repeat;
+}

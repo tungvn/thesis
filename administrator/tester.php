@@ -8,7 +8,7 @@ if ($pathParts[1] == 'wfsauth') {
 	$pass = array_shift($pathParts);
 	
 	// Pass through for WFS using username and password to follow
-	require_once "includes/GeoserverWrapper.php";
+	include_once "includes/GeoserverWrapper.php";
 	$geoserver = new GeoserverWrapper('http://localhost:8080/geoserver', $user, $pass);
 	$wfs = implode('/', $pathParts);
 	if ($_SERVER['QUERY_STRING'] != '') $wfs .= '?' . $_SERVER['QUERY_STRING'];
@@ -19,7 +19,7 @@ if ($pathParts[1] == 'wfsauth') {
 	$unused = array_shift($pathParts);
 	
 	// No auth required
-	require_once "includes/GeoserverWrapper.php";
+	include_once "includes/GeoserverWrapper.php";
 	$geoserver = new GeoserverWrapper('http://localhost:8080/geoserver');
 	$wfs = implode('/', $pathParts);
 	if ($_SERVER['QUERY_STRING'] != '') $wfs .= '?' . $_SERVER['QUERY_STRING'];
@@ -30,7 +30,7 @@ if ($pathParts[1] == 'wfsauth') {
 // No WFS? Proceed with our simple test script...
 
 if (isset($_REQUEST['action'])) {
-	require_once "includes/GeoserverWrapper.php";
+	include_once "includes/GeoserverWrapper.php";
 	$geoserver = new GeoserverWrapper('http://localhost:8080/geoserver', $_REQUEST['username'], $_REQUEST['password']);
 
 	switch ($_REQUEST['action']) {
@@ -98,7 +98,7 @@ if (isset($_REQUEST['action'])) {
 ?>
 <html>
 	<head>
-		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+		<script src="../js/jquery-1.9.1.js"></script>
 		<title>Test Page for GeoServer PHP Wrapper</title>
 	</head>
 

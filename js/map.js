@@ -130,7 +130,10 @@ jQuery(document).ready(function() {
 		return layers;
 	}
 	
-	
+	// action map bar
+	$('span.icon-map_bar').click(function() {
+		console.log($(this).attr("for"));
+	});
 });
 // Get latlng to show map from search
 function showResult(lat, lng) {
