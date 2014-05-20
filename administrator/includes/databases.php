@@ -32,7 +32,7 @@ function createDB($name) {
 	$link = connectServer(HOST, DBUSER, DBPASS);
 	if(!$link) return false;
 
-	$query = 'CREATE DATABASE ' . $name;
+	$query = 'CREATE DATABASE "' . $name . '"';
 	$result = pg_query($link, $query);
 
 	closeDB($link);
@@ -81,7 +81,7 @@ function dropDB($name) {
 	$link = connectServer(HOST, DBUSER, DBPASS);
 	if(!$link) return false;
 
-	$query = 'DROP DATABASE IF EXISTS ' . $name;
+	$query = 'DROP DATABASE IF EXISTS "' . $name . '"';
 	$result = pg_query($link, $query);
 
 	closeDB($link);

@@ -29,6 +29,7 @@ require_once(dirname(__FILE__) . '/functions.php');
 		);
 		if($_POST['type'] == 'workspace') {
 			$args['name'] = $_POST['name'];
+			$args['slug'] = vn_str_filter($_POST['name']);
 		}
 		if($_POST['type'] == 'layer') {
 			$args['workspace'] = $_POST['workspace'];
@@ -45,7 +46,7 @@ require_once(dirname(__FILE__) . '/functions.php');
 					move_uploaded_file($_FILES['shpfile']['tmp_name'][$key], $dir . $_FILES['shpfile']['name'][$key]);
 					if($extension == 'shp') {
 						$args['shpfile'] = $dir . $_FILES['shpfile']['name'][$key];
-						$args['name'] = $_FILES['shpfile']['name'][$key];
+						$args['name'] = strtolower(substr($_FILES['shpfile']['name'][$key], 0, strpos($_FILES['shpfile']['name'][$key], '.shp')));
 					}
 				}
 			}

@@ -560,9 +560,14 @@ function singleObject($obj_type, $obj) { ?>
 						<?php $fields = getFields(getObjectSlug($row['workspace']), $row['slug']); 
 						if($fields) {
 							$num_fields = sizeof($fields) + 1;
-							foreach ($fields as $column_name => $data_type) { ?>
-							<td class="has-border" style="width: <?php echo 95/$num_fields; ?>%; padding: 10px 0; text-align: center;"><?php echo $column_name; ?></td>
-							<?php }
+							foreach ($fields as $column_name => $data_type) { 
+								if($column_name != 'gid') { ?>
+								<td style="width: <?php echo 90/$num_fields; ?>%; padding: 10px 0;"><?php echo $column_name; ?></td>
+								<?php }
+								else { ?>
+								<td style="width: 5%;">gid</td>
+								<?php }
+							} 
 						} ?>
 							<td style="width: 5%;">&nbsp;</td>
 						</tr>
@@ -660,9 +665,8 @@ function addNewObject($data) {
 				);
 				$result_2 = insertRecords(DBNAME, 'object', $args);
 				if($result_2) {
-					$push = array('workspace' => $data['slug'], 'datastore' => $data['slug']);
+					$push = array('workspace' => $data['slug'], 'datastore' => $data['slug'], 'dbname' => $data['slug']);
 					publish2Frontend('createworkspace', $push);
-					publish2Frontend('createdatastorepostgis', $push);
 					echo 'success';
 				}
 				else echo 'fail_insert_tb';
@@ -686,7 +690,7 @@ function addNewObject($data) {
 		if($result == 'COMMIT') {
 			$args = array(
 				'name' => $data['name'],
-				'slug' => vn_str_filter($data['name']),
+				'slug' => $data['name'],
 				'type' => $data['type'],
 				'workspace' => $data['workspace'],
 				'description' => $data['description'],
@@ -695,11 +699,13 @@ function addNewObject($data) {
 			$result_2 = insertRecords(DBNAME, 'object', $args);
 			if($result_2) {
 				$push = array(
-					'layer' => vn_str_filter($data['name']),
+					'layer' => $data['name'],
 					'workspace' => getObjectSlug($data['workspace']),
-					'datastore' => getObjectSlug($data['workspace']),
+					'dbname' => getObjectSlug($data['workspace']),
+					'datastore' => getObjectSlug($data['workspace']) . '_' . $data['name'],
 					'description' => $data['description']
 				);
+				publish2Frontend('createdatastorepostgis', $push);
 				publish2Frontend('createlayer', $push);
 				echo 'success';
 			}
@@ -746,10 +752,10 @@ function deleteObject($datas) {
 				$result_del_db = dropDB($slug);
 				if($result_del_db) {
 					$wheres = array('workspace' => $ids[$i]);
-					$result_del_layer = dropRecords(DBNAME, 'object', $wheres);
-					if($result_del_layer) {
-// temp
-						// publish2Frontend('deleteworkspace');
+					$result_del_wp = dropRecords(DBNAME, 'object', $wheres);
+					if($result_del_wp) {
+						$push = array('workspace' => $slug);
+						publish2Frontend('deleteworkspace', $push);
 						$check = 'success';
 					}
 					else $check = 'fail_del_layer_inline';
@@ -760,9 +766,14 @@ function deleteObject($datas) {
 				}
 			}
 			else {
-				// temp
-				$push = array();
-				// publish2Frontend('deletelayer', )
+				$selects = array('workspace');
+				$wheres = array('id' => $ids[$i]);
+				$wp = getRecords(DBNAME, 'object', $selects, $wheres);
+				$wp = pg_fetch_array($wp);
+				$wp = getObjectSlug($wp['workspace']);
+
+				$push = array('layer' => $slug, 'datastore' => $wp . '_' . $slug, 'workspace' => $wp);
+				publish2Frontend('deletelayer', $push);
 				$check = 'success';
 			}
 		}
