@@ -130,7 +130,7 @@
 		<!--<script type="text/javascript" src="http://localhost:8080/geoserver/openlayers/OpenLayers.js"></script>-->
 		
 
-		<!-- Google Charts
+		<!-- Google Charts -->
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 		<script type="text/javascript">
 		// Load the Visualization API and the piechart package.
@@ -164,7 +164,7 @@
 			var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
 			chart.draw(data, options);
 		}
-		</script>-->
+		</script>
 		
 		<!-- Search tool -->
 		<script src="js/vietuni.js" type='text/javascript'></script>

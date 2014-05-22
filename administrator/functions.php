@@ -195,6 +195,15 @@ function listObject($obj_type) { ?>
 				</select>
 				<input type="hidden" name="object_type" value="<?php echo $obj_type; ?>">
 				<input type="submit" value="Apply" class="button fl has-border-radius" style="padding: 7px 10px 6px; margin-left: 10px;">
+				<?php if(isset($_GET['publish'])): 
+					if($_GET['publish'] == 1): ?>
+					<a href="edit.php?obj=<?php echo $obj_type; ?>&publish=0" class="fr">Unpublish</a>
+					<?php else: ?>
+						<a href="edit.php?obj=<?php echo $obj_type; ?>&publish=1" class="fr">Publish</a>
+					<?php endif; 
+					else: ?>
+					<a href="edit.php?obj=<?php echo $obj_type; ?>&publish=0" class="fr">Unpublish</a>
+				<?php endif; ?>
 				<?php endif; ?>
 			</div>
 			<div class="grid-4 table">
@@ -207,7 +216,8 @@ function listObject($obj_type) { ?>
 				</div>
 				<div class="grid-4 tbody">
 				<?php $paged = isset($_GET['paged']) ? $_GET['paged'] : 1;
-				$rows = getObjects($obj_type, 10, ($paged-1)*10); 
+				$publish = isset($_GET['publish']) ? $_GET['publish'] : 1;
+				$rows = getObjects($obj_type, 10, ($paged-1)*10, $publish); 
 				if($rows) {
 					$i = 0;
 					while ($row = pg_fetch_array($rows)) { ?>
@@ -308,6 +318,15 @@ function listUsers($obj_type) { ?>
 					<?php endforeach; ?>
 				</select>
 				<input type="submit" value="Apply" class="button fl has-border-radius" style="padding: 7px 10px 6px; margin-left: 10px;">
+				<?php if(isset($_GET['verify'])): 
+					if($_GET['verify'] == 1): ?>
+					<a href="edit.php?obj=<?php echo $obj_type; ?>&verify=0" class="fr">Non-Verify</a>
+					<?php else: ?>
+						<a href="edit.php?obj=<?php echo $obj_type; ?>&verify=1" class="fr">Verify</a>
+					<?php endif; 
+					else: ?>
+					<a href="edit.php?obj=<?php echo $obj_type; ?>&verify=0" class="fr">Non-Verify</a>
+				<?php endif; ?>
 				<?php endif; ?>
 			</div>
 			<div class="grid-4 table">
@@ -321,7 +340,8 @@ function listUsers($obj_type) { ?>
 				<div class="grid-4 tbody">
 				<?php $paged = isset($_GET['paged']) ? $_GET['paged'] : 1;
 				$selects = array('*'); 
-				$wheres = array('verify' => 1);
+				$verify = isset($_GET['verify']) ? $_GET['verify'] : 1;
+				$wheres = array('verify' => $verify);
 				$rows = getRecords(DBNAME, 'users', $selects, $wheres, 10, ($paged-1)*10); 
 				if($rows) {
 					$i = 0;
@@ -379,7 +399,7 @@ function edit($obj_type) { ?>
 		<?php endif; ?>
 	</div>
 	<?php else: ?>
-	<div id="object" class="fl" for="users">
+	<div id="object" class="grid-4" for="users">
 	<?php if(is_admin() || is_moder()): ?>
 		<div class="grid-4">
 		<?php listUsers($obj_type); ?>
@@ -390,11 +410,11 @@ function edit($obj_type) { ?>
 }
 
 
-function getObjects($obj_type, $limit = 99999, $offset = 0) {
+function getObjects($obj_type, $limit = 99999, $offset = 0, $publish = 1) {
 	$selects = array( 'id', 'name', 'slug', 'workspace', 'description' );
 	$wheres = array(
 		'type' => $obj_type,
-		'publish' => 1
+		'publish' => $publish
 	);
 	$rows = getRecords(DBNAME, 'object', $selects, $wheres, $limit, $offset);
 	if($rows === false) return false;
@@ -745,13 +765,34 @@ function deleteObject($datas) {
 	}
 
 	foreach ($slugs as $i => $slug) {
+		$selects = array('workspace');
 		$wheres = array('id' => $ids[$i]);
+		$wp = getRecords(DBNAME, 'object', $selects, $wheres);
+		$wp = pg_fetch_array($wp);
+		$wp = getObjectSlug($wp['workspace']);
+
 		$result_del_obj = dropRecords(DBNAME, 'object', $wheres);
 		if($result_del_obj) {
 			if($obj_type == 'workspace') {
 				$result_del_db = dropDB($slug);
 				if($result_del_db) {
-					$wheres = array('workspace' => $ids[$i]);
+					$wheres = array('workspace' => $id_wp);
+
+					$selects = array('slug');
+					$rows_layer = getRecords(DBNAME, 'object', $selects, $wheres);
+					if($rows_layer && pg_num_rows($rows_layer) > 0) {
+						while($row_layer = pg_fetch_array($rows_layer)) {
+							$push = array(
+								'layer' => $row_layer['slug'], 
+								'datastore' => $slug . '_' . $row_layer['slug'], 
+								'workspace' => $slug
+							);
+							print_r($push);
+							publish2Frontend('deletelayer', $push);
+							publish2Frontend('deletedatastore', $push);
+						}
+					}
+
 					$result_del_wp = dropRecords(DBNAME, 'object', $wheres);
 					if($result_del_wp) {
 						$push = array('workspace' => $slug);
@@ -766,15 +807,16 @@ function deleteObject($datas) {
 				}
 			}
 			else {
-				$selects = array('workspace');
-				$wheres = array('id' => $ids[$i]);
-				$wp = getRecords(DBNAME, 'object', $selects, $wheres);
-				$wp = pg_fetch_array($wp);
-				$wp = getObjectSlug($wp['workspace']);
-
-				$push = array('layer' => $slug, 'datastore' => $wp . '_' . $slug, 'workspace' => $wp);
-				publish2Frontend('deletelayer', $push);
-				$check = 'success';
+				$result_del_tb = dropTable($wp, $slug);
+				if($result_del_tb) {
+					$push = array('layer' => $slug, 'datastore' => $wp . '_' . $slug, 'workspace' => $wp);
+					publish2Frontend('deletelayer', $push);
+					publish2Frontend('deletedatastore', $push);
+					$check = 'success';
+				}
+				else {
+					$check = 'fail_del_tb';
+				}
 			}
 		}
 		else {
@@ -945,7 +987,7 @@ function publish2Frontend($request, $data) {
 			$geoserver->createWorkspace($data['workspace']);
 			break;
 		case 'deleteworkspace':
-			$geoserver->deleteWorkspace($data['workspace']);
+			print_r($geoserver->deleteWorkspace($data['workspace']));
 			break;
 		case 'createdatastorepostgis':
 			$geoserver->createPostGISDataStore($data['datastore'], $data['workspace'], $data['dbname'], DBUSER, DBPASS, HOST);

@@ -29,7 +29,7 @@ include_once('functions.php');?>
 			</div>
 			<ul class="top_menu fl">
 				<li><a href="<?php echo getOption('administrator_url'); ?>">Home</a></li>
-				<li><a href="<?php echo getOption('base_url'). '/map.php'; ?>">Visit Map</a></li>
+				<li><a href="<?php echo getOption('base_url'). '/map.php'; ?>" target="_blank">Visit Map</a></li>
 				<!-- <li><a href="#">Option 2</a></li> -->
 			</ul>
 			<div class="user_menu fr">

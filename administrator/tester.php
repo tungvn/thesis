@@ -1,6 +1,6 @@
 <?php
 // See if we're passing a WFS request to the server on private net (or for cross domain protection bypassing proxy)
-$pathParts = explode('/', $_SERVER['PATH_INFO']);
+/*$pathParts = explode('/', $_SERVER['PATH_INFO']);
 if ($pathParts[1] == 'wfsauth') {
 	$unused = array_shift($pathParts);
 	$unused = array_shift($pathParts);
@@ -25,7 +25,7 @@ if ($pathParts[1] == 'wfsauth') {
 	if ($_SERVER['QUERY_STRING'] != '') $wfs .= '?' . $_SERVER['QUERY_STRING'];
 	echo $geoserver->wfsPost($wfs, file_get_contents('php://input'));
 	return;
-}
+}*/
 
 // No WFS? Proceed with our simple test script...
 
@@ -115,7 +115,7 @@ if (isset($_REQUEST['action'])) {
 		
 		<h4>List Workspaces</h4>
 		<table border="0">
-			<tr><td width="75px"></td><td><button onclick="$('#listworkspaces_results').load('<?=$PHP_SELF?>?action=listworkspaces&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()));">Execute</button></td></tr>
+			<tr><td width="75px"></td><td><button onclick="$('#listworkspaces_results').load('<?=$_SERVER["PHP_SELF"]?>?action=listworkspaces&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()));">Execute</button></td></tr>
 		</table>
 
 		<b>Results</b>:<br />
@@ -126,7 +126,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>Create Workspace</h4>
 		<table border="0">
 			<tr><td>Workspace:</td><td><input id="createworkspace_workspace"></td></tr>
-			<tr><td></td><td><button onclick="$('#createworkspace_results').load('<?=$PHP_SELF?>?action=createworkspace&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#createworkspace_workspace').val()));">Execute</button></td></tr>
+			<tr><td></td><td><button onclick="$('#createworkspace_results').load('<?=$_SERVER["PHP_SELF"]?>?action=createworkspace&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#createworkspace_workspace').val()));">Execute</button></td></tr>
 		</table>
 
 		<b>Results</b>:<br />
@@ -137,7 +137,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>Delete Workspace</h4>
 		<table border="0">
 			<tr><td>Workspace:</td><td><input id="deleteworkspace_workspace"></td></tr>
-			<tr><td></td><td><button onclick="$('#deleteworkspace_results').load('<?=$PHP_SELF?>?action=deleteworkspace&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#deleteworkspace_workspace').val()));">Execute</button></td></tr>
+			<tr><td></td><td><button onclick="$('#deleteworkspace_results').load('<?=$_SERVER["PHP_SELF"]?>?action=deleteworkspace&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#deleteworkspace_workspace').val()));">Execute</button></td></tr>
 		</table>
 
 		<b>Results</b>:<br />
@@ -148,7 +148,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>List Data Stores in Workspace</h4>
 		<table border="0">
 			<tr><td>Workspace:</td><td><input id="listdatastores_workspace"></td></tr>
-			<tr><td></td><td><button onclick="$('#listdatastores_results').load('<?=$PHP_SELF?>?action=listdatastores&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#listdatastores_workspace').val()));">Execute</button></td></tr>
+			<tr><td></td><td><button onclick="$('#listdatastores_results').load('<?=$_SERVER["PHP_SELF"]?>?action=listdatastores&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#listdatastores_workspace').val()));">Execute</button></td></tr>
 		</table>
 
 		<pre id="listdatastores_results">(Press "Execute" First)</pre>
@@ -160,7 +160,7 @@ if (isset($_REQUEST['action'])) {
 			<tr><td>Workspace:</td><td><input id="createdatastore_workspace"></td></tr>
 			<tr><td>Data Store:</td><td><input id="createdatastore_datastore"></td></tr>
 			<tr><td>Location:</td><td><input id="createdatastore_location"> (relative to GeoServer data dir, e.g. data/usa)</td></tr>
-			<tr><td></td><td><button onclick="$('#createdatastore_results').load('<?=$PHP_SELF?>?action=createdatastore&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#createdatastore_workspace').val()) + '&datastore=' + escape($('#createdatastore_datastore').val()) + '&location=' + escape($('#createdatastore_location').val()));">Execute</button></td></tr>
+			<tr><td></td><td><button onclick="$('#createdatastore_results').load('<?=$_SERVER["PHP_SELF"]?>?action=createdatastore&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#createdatastore_workspace').val()) + '&datastore=' + escape($('#createdatastore_datastore').val()) + '&location=' + escape($('#createdatastore_location').val()));">Execute</button></td></tr>
 		</table>
 
 		<pre id="createdatastore_results">(Press "Execute" First)</pre>
@@ -175,7 +175,7 @@ if (isset($_REQUEST['action'])) {
 			<tr><td>Database Name:</td><td><input id="createdatastorepostgis_dbname"></td></tr>
 			<tr><td>Database User:</td><td><input id="createdatastorepostgis_dbuser"></td></tr>
 			<tr><td>Database Password:</td><td><input id="createdatastorepostgis_dbpass"></td></tr>
-			<tr><td></td><td><button onclick="$('#createdatastorepostgis_results').load('<?=$PHP_SELF?>?action=createdatastorepostgis&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#createdatastorepostgis_workspace').val()) + '&datastore=' + escape($('#createdatastorepostgis_datastore').val()) + '&dbhost=' + escape($('#createdatastorepostgis_host').val()) + '&dbname=' + escape($('#createdatastorepostgis_dbname').val()) + '&dbuser=' + escape($('#createdatastorepostgis_dbuser').val()) + '&dbpass=' + escape($('#createdatastorepostgis_dbpass').val()));">Execute</button></td></tr>
+			<tr><td></td><td><button onclick="$('#createdatastorepostgis_results').load('<?=$_SERVER["PHP_SELF"]?>?action=createdatastorepostgis&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#createdatastorepostgis_workspace').val()) + '&datastore=' + escape($('#createdatastorepostgis_datastore').val()) + '&dbhost=' + escape($('#createdatastorepostgis_host').val()) + '&dbname=' + escape($('#createdatastorepostgis_dbname').val()) + '&dbuser=' + escape($('#createdatastorepostgis_dbuser').val()) + '&dbpass=' + escape($('#createdatastorepostgis_dbpass').val()));">Execute</button></td></tr>
 		</table>
 
 		<pre id="createdatastorepostgis_results">(Press "Execute" First)</pre>
@@ -186,7 +186,7 @@ if (isset($_REQUEST['action'])) {
 		<table border="0">
 			<tr><td>Workspace:</td><td><input id="deletedatastore_workspace"></td></tr>
 			<tr><td>Data Store:</td><td><input id="deletedatastore_datastore"></td></tr>
-			<tr><td></td><td><button onclick="$('#deletedatastore_results').load('<?=$PHP_SELF?>?action=deletedatastore&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#deletedatastore_workspace').val()) + '&datastore=' + escape($('#deletedatastore_datastore').val()));">Execute</button></td></tr>
+			<tr><td></td><td><button onclick="$('#deletedatastore_results').load('<?=$_SERVER["PHP_SELF"]?>?action=deletedatastore&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#deletedatastore_workspace').val()) + '&datastore=' + escape($('#deletedatastore_datastore').val()));">Execute</button></td></tr>
 		</table>
 
 		<pre id="deletedatastore_results">(Press "Execute" First)</pre>
@@ -197,7 +197,7 @@ if (isset($_REQUEST['action'])) {
 		<table border="0">
 			<tr><td>Workspace:</td><td><input id="listlayers_workspace"></td></tr>
 			<tr><td>Datastore:</td><td><input id="listlayers_datastore"></td></tr>
-			<tr><td></td><td><button onclick="$('#listlayers_results').load('<?=$PHP_SELF?>?action=listlayers&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#listlayers_workspace').val()) + '&datastore=' + escape($('#listlayers_datastore').val()));">Execute</button></td></tr>
+			<tr><td></td><td><button onclick="$('#listlayers_results').load('<?=$_SERVER["PHP_SELF"]?>?action=listlayers&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()) + '&workspace=' + escape($('#listlayers_workspace').val()) + '&datastore=' + escape($('#listlayers_datastore').val()));">Execute</button></td></tr>
 		</table>
 
 		<pre id="listlayers_results">(Press "Execute" First)</pre>
@@ -207,7 +207,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>Create Layer</h4>
 		<script type="text/javascript">
 			function doCreateLayer() {
-				$.post('<?=$PHP_SELF?>', {
+				$.post('<?=$_SERVER["PHP_SELF"]?>', {
 				'action': 'createlayer',
 				'username': $('#username').val(),
 				'password': $('#password').val(),
@@ -236,7 +236,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>Delete Layer</h4>
 		<script type="text/javascript">
 			function doDeleteLayer() {
-				$.post('<?=$PHP_SELF?>', {
+				$.post('<?=$_SERVER["PHP_SELF"]?>', {
 				'action': 'deletelayer',
 				'username': $('#username').val(),
 				'password': $('#password').val(),
@@ -262,7 +262,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>View Layer</h4>
 		<script type="text/javascript">
 			function doViewLayer() {
-				$.post('<?=$PHP_SELF?>', {
+				$.post('<?=$_SERVER["PHP_SELF"]?>', {
 				'action': 'viewlayer',
 				'username': $('#username').val(),
 				'password': $('#password').val(),
@@ -291,7 +291,7 @@ if (isset($_REQUEST['action'])) {
 
 		<h4>List Styles</h4>
 		<table border="0">
-			<tr><td width="75px"></td><td><button onclick="$('#liststyles_results').load('<?=$PHP_SELF?>?action=liststyles&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()));">Execute</button></td></tr>
+			<tr><td width="75px"></td><td><button onclick="$('#liststyles_results').load('<?=$_SERVER["PHP_SELF"]?>?action=liststyles&username=' + escape($('#username').val()) + '&password=' + escape($('#password').val()));">Execute</button></td></tr>
 		</table>
 
 		<b>Results</b>:<br />
@@ -302,7 +302,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>Create Style</h4>
 		<script type="text/javascript">
 			function doCreateStyle() {
-				$.post('<?=$PHP_SELF?>', {
+				$.post('<?=$_SERVER["PHP_SELF"]?>', {
 				'action': 'createstyle',
 				'username': $('#username').val(),
 				'password': $('#password').val(),
@@ -326,7 +326,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>Delete Style</h4>
 		<script type="text/javascript">
 			function doDeleteStyle() {
-				$.post('<?=$PHP_SELF?>', {
+				$.post('<?=$_SERVER["PHP_SELF"]?>', {
 				'action': 'deletestyle',
 				'username': $('#username').val(),
 				'password': $('#password').val(),
@@ -348,7 +348,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>Assign Style to Layer</h4>
 		<script type="text/javascript">
 			function doAssignStyle() {
-				$.post('<?=$PHP_SELF?>', {
+				$.post('<?=$_SERVER["PHP_SELF"]?>', {
 				'action': 'assignstyle',
 				'username': $('#username').val(),
 				'password': $('#password').val(),
@@ -374,7 +374,7 @@ if (isset($_REQUEST['action'])) {
 		<h4>Execute WFS-T Transaction</h4>
 		<script type="text/javascript">
 			function doWFST() {
-				$.post('<?=$PHP_SELF?>', {
+				$.post('<?=$_SERVER["PHP_SELF"]?>', {
 				'action': 'wfs-t',
 				'username': $('#username').val(),
 				'password': $('#password').val(),

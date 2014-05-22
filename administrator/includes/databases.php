@@ -76,10 +76,11 @@ function createExtension($dbname) {
 }
 
 function dropDB($name) {
-	if(@pg_dbname())
-		closeDB(pg_dbname());
 	$link = connectServer(HOST, DBUSER, DBPASS);
 	if(!$link) return false;
+
+	$query = "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '$name' AND pid <> pg_backend_pid()";
+	pg_query($link, $query);
 
 	$query = 'DROP DATABASE IF EXISTS "' . $name . '"';
 	$result = pg_query($link, $query);

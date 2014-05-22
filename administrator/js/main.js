@@ -117,7 +117,7 @@ jQuery(document).ready(function($) {
 			var request = {};
 			if(data[0].name == 'action' && data[0].value != '') {
 				$('#notification').find('span').each(function() { $(this).css('display', 'none'); });
-				$('#notification').find('p').html('');
+				// $('#notification').find('p').html('');
 				
 				request = {
 					data: data,
@@ -144,10 +144,10 @@ jQuery(document).ready(function($) {
 					})
 					.fail(function() {
 						$('#notification').find('span.error').css('display', 'block');
-						$('#notification').find('p').css('color', 'red').html('Cannot delete objects!');
+						$('#notification').find('p').css('color', 'red').html('Ooopss! Something was wrong!');
 					})
 					.always(function() {
-						setTimeout(location.reload(), 2000);
+						// setTimeout(location.reload(), 2000);
 					});
 			}
 			else {
